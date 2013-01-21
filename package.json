@@ -5,6 +5,7 @@
 , "homepage": "http://a2p3.ca"
 , "author": "Dick Hardt dickhardt@gmail.com"
 , "license": "MIT"
+, "private": true
 , "dependencies":
   { "express": "*"
   , "async": "*"
