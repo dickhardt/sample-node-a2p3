@@ -12,7 +12,7 @@
 var express = require('express')
   , async = require('async')
   , app = express()
-  , a2p3 = require('../../lib/a2p3') // change to 'a2p3' if using this as template
+  , a2p3 = require('a2p3') // change to 'a2p3' if using this as template
 
 var HOST_ID = 'example.a2p3.com'
   , HOST_PORT = 8080
@@ -33,6 +33,7 @@ var EMAIL_RS  = 'email.a2p3.net'
   , SI_PROFILE_URL     = 'http://si.a2p3.net/number'
   , HEALTH_PROFILE_URL = 'http://health.a2p3.net/prov_number'
 
+var tinyURLs = {}
 
 // login() - called by web app
 // creates an agentRequest and state
@@ -46,7 +47,27 @@ function login( req, res )  {
   req.session.a2p3 = request.stringify()
   var state = a2p3.random16bytes()
   req.session.state = state
-  res.send( { result: { agentRequest: agentRequest, state: state } } )
+  var tinyIndex = a2p3.random16bytes()
+  tinyURLs[tinyIndex] =
+    { fullURL: 'a2p3://token?request='+agentRequest+'&state='+state
+    , created: Date.now()
+    }
+  var tinyURL = HOST_URL + '/tiny/' + tinyIndex
+  res.send( { result: { agentRequest: agentRequest, state: state, tinyURL: tinyURL } } )
+}
+
+function tiny( req, res ) {
+  var tinyIndex = req.params.tiny
+  if ( tinyURLs[ tinyIndex ] ) {
+    res.redirect( tinyURLs[ tinyIndex ].fullURL )
+    delete tinyURLs[ tinyIndex ]
+    var expiryTime = Date.now() - 5*60*1000
+    Object.keys( tinyURLs ).forEach( function ( index ) {
+      if ( tinyURLs[ index ].createed < expiryTime ) delete tinyURLs[ index ]
+    })
+  } else {
+    res.redirect('/error')
+  }
 }
 
 // clear session, logout user
@@ -107,14 +128,10 @@ function loginResponse( req, res )  {
 function fetchProfile( tokens, a2p3String, callback ) {
   var request = new a2p3.Request( a2p3String )
   var tasks = {}
-  tasks[ EMAIL_RS ] = function ( done ) {
-    request.call( EMAIL_PROFILE_URL, done ) }
-  tasks[ PEOPLE_RS ] = function ( done ) {
-    request.call( PEOPLE_PROFILE_URL, done ) }
-  tasks[ SI_RS ] = function ( done ) {
-    request.call( SI_PROFILE_URL, done ) }
-  tasks[ HEALTH_RS ] = function ( done ) {
-    request.call( HEALTH_PROFILE_URL, done ) }
+  tasks[ EMAIL_RS ] = function ( done ) { request.call( EMAIL_PROFILE_URL, done ) }
+  tasks[ PEOPLE_RS ] = function ( done ) { request.call( PEOPLE_PROFILE_URL, done ) }
+  tasks[ SI_RS ] = function ( done ) { request.call( SI_PROFILE_URL, done ) }
+  tasks[ HEALTH_RS ] = function ( done ) { request.call( HEALTH_PROFILE_URL, done ) }
   async.parallel( tasks, callback )
 }
 
@@ -155,6 +172,7 @@ app.get('/profile', profile )
 // these pages change state and return a redirect
 app.get('/response', loginResponse )
 app.get('/logout', logout )
+app.get('/tiny/:index', tiny )
 
 // these endpoints serve static HTML pages
 app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html' ) } )

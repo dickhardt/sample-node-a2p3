@@ -1,5 +1,5 @@
 { "name": "a2p3sample"
-, "version": "0.0.1"
+, "version": "0.0.2"
 , "description": "Sample app for A2P3 Proof of Concept"
 , "keywords": ["A2P3","a2p3","identity"]
 , "homepage": "http://a2p3.ca"
@@ -8,7 +8,7 @@
 , "dependencies":
   { "express": "*"
   , "async": "*"
-  , "request": "*"
+  , "a2p3": "*"
   }
 , "devDependencies":
   { "chai": "*"

@@ -42,19 +42,15 @@ function onReady() {
 
   $('#login').click( function () {
     $.get( '/login', function ( data, status ) {
-      if (status == "success" && !data.error && data.result && data.result.agentRequest) {   // TBD, deal with error
+      if (status == "success" && !data.error && data.result
+      && data.result.agentRequest && data.result.tinyURL) {   // TBD, deal with error
         var agentURL = 'a2p3://token?request=' + data.result.agentRequest + '&state=' + data.result.state
         var backdoorURL = 'http://setup.a2p3.net/backdoor/login?request=' + data.result.agentRequest
         $('#loginMobile').attr( 'href', agentURL )
         $('#loginBackdoor').attr( 'href', backdoorURL )
         $('#qrcode').empty()
         $('#qrcodeForm').fadeIn('fast')
-        // $('#qrcode').qrcode( {width: 500, height: 500, text: agentURL } )
-
-
-var testQR = 'a2p3://token?request=eyJ0eXAiOiJKV1MiLCJhbGciOiJIUzUxMiIsImtpZCI6InpyQWp2dGRLQUkzZ0NZRW0ifQ.eyJpc3MiOiJleGFtcGxlLmEycDMuY29tIiwiYXVkIjoiaXguYTJwMy5uZXQiLCJpYXQiOjEzNTg3ODQ0NzAsInJlcXVlc3QuYTJwMy5vcmciOnsicmVzb3VyY2VzIjpbImh0dHA6Ly9lbWFpbC5hMnAzLm5ldC9zY29wZS9kZWZhdWx0IiwiaHR0cDovL3Blb3BsZS5hMnAzLm5ldC9zY29wZS9kZXRhaWxzIiwiaHR0cDovL3NpLmEycDMubmV0L3Njb3BlL251bWJlciIsImh0dHA6Ly9oZWFsdGguYTJwMy5uZXQvc2NvcGUvcHJv'
-
-$('#qrcode').qrcode( {width: 500, height: 500, text: testQR } )
+        $('#qrcode').qrcode( {width: 500, height: 500, text: data.result.tinyURL } )
 
 // TBD -- need to query to see if we are logged in from mobile agent, and then reload page -- or load profile
 // put profile loading into a separate function, then can call on load, and on successful login
