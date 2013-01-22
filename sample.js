@@ -15,8 +15,8 @@ var express = require('express')
   , a2p3 = require('a2p3') // change to 'a2p3' if using this as template
 
 var HOST_ID = 'example.a2p3.com'
-  , HOST_PORT = 8080
-  , HOST_URL = 'http://a2p3sample-dickhardt.dotcloud.com'   // http://example.a2p3.com'
+  , LISTEN_PORT = 8080
+  , HOST_URL = 'http://a2p3sample-dickhardt.dotcloud.com'   // http://localhost:8080 if running locally
   , RESOURCES =
     [ 'http://email.a2p3.net/scope/default'
     , 'http://people.a2p3.net/scope/details'
@@ -43,7 +43,7 @@ function login( req, res )  {
     , vault: __dirname + '/vault.json'
     , ixURL: 'http://ix.a2p3.net'
     })
-  var agentRequest = request.agent( HOST_URL + ':' + HOST_PORT + '/response', RESOURCES )
+  var agentRequest = request.agent( HOST_URL + '/response', RESOURCES )
   req.session.a2p3 = request.stringify()
   var state = a2p3.random16bytes()
   req.session.state = state
@@ -179,6 +179,6 @@ app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html'
 app.get('/error', function( req, res ) { res.sendfile( __dirname + '/html/login_error.html' ) } )
 app.get('/complete', function( req, res ) { res.sendfile( __dirname + '/html/login_complete.html' ) } )
 
-app.listen( HOST_PORT )
+app.listen( LISTEN_PORT )
 
-console.log('\nSample App started and listening on ', HOST_PORT)
+console.log('\nSample App started and listening on ', HOST_URL)
