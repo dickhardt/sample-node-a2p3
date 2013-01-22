@@ -1,0 +1,14 @@
+{ "host":           "example.a2p3.com"
+, "name":           "Example A2P3 App"
+, "device":         "Put your CLI device code here"
+, "resources":
+    [ "email.a2p3.net"
+    , "people.a2p3.net"
+    , "si.a2p3.net"
+    , "health.a2p3.net"
+    ]
+, "//": "The following are for developing against a local install of A2P3 servers"
+, "protocol":   "http"
+, "registrarURL":   "http://registrar.a2p3.net"
+, "setupURL":   "http://setup.a2p3.net"
+}
