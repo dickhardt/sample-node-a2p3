@@ -16,7 +16,7 @@ var express = require('express')
 
 var HOST_ID = 'example.a2p3.com'
   , HOST_PORT = 8080
-  , HOST_URL = 'http://localhost'   // http://example.a2p3.com'
+  , HOST_URL = 'http://a2p3sample-dickhardt.dotcloud.com'   // http://example.a2p3.com'
   , RESOURCES =
     [ 'http://email.a2p3.net/scope/default'
     , 'http://people.a2p3.net/scope/details'
