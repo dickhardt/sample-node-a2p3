@@ -3,6 +3,11 @@ sample-node-a2p3
 
 Sample application for A2P3
 
+#### config.json
+
+The config.json file is used by `register.js` to generate the `vault.json` file, and is passed to modules to configure how calls are made. Looked at the `server.js` source to see other defaults that can be changed for more complex development environments.
+
+
 ## Related
 
 [A2P3.CA](http://a2p3.ca) A2P3 project home page

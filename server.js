@@ -1,5 +1,5 @@
 /*
-* sample.js
+* server.js
 *
 * Sample App
 *
