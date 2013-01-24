@@ -20,11 +20,14 @@ var express = require('express')
   , app = express()
   , a2p3 = require('a2p3') // change to 'a2p3' if using this as template
 
-var HOST_ID = 'example.a2p3.com'
-  , LISTEN_PORT = 8080
-//  , HOST_URL = 'http://localhost:8080' // if running locally
-  , HOST_URL = 'http://sample-dickhardt.dotcloud.com'
-  , RESOURCES =
+var LISTEN_PORT = 8080
+  , HOST_URL = 'http://localhost:8080'    // for running locally
+
+if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
+  HOST_URL = process.env.DOTCLOUD_WWW_HTTP_URL
+  LISTEN_PORT = 8080
+}
+var RESOURCES =
     [ 'http://email.a2p3.net/scope/default'
     , 'http://people.a2p3.net/scope/details'
     , 'http://si.a2p3.net/scope/number'
