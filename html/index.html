@@ -12,8 +12,6 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   <script type="text/javascript"    src="/jquery.qrcode.min.js"></script>
 
-<a href="" id="getProfile">get profile</a>
-
 <div class="loginStatus">
   <a href="" id="login" class="loginItem"> login </a>
   <a href="/logout" id="logout" class="loginItem">logout </a>
@@ -81,20 +79,6 @@ console.log( profile )
     })
     return false
   })
-
-$('#getProfile').click( function () {
-  console.log('getProfile clicked!')
-  $.get( '/profile', function ( data, status ) {
-    console.log( '/profile ->', data )
-    if (status == "success" && !data.error && data.result ) {   // TBD, deal with error
-      $('#logout').show()
-      $('#login').hide()
-      drawProfile( data.result )
-    }
-  })
-  return false
-})
-
 
   $.get( '/profile', function ( data, status ) {
     console.log( '/profile ->', data )

@@ -8,6 +8,13 @@
 * Copyright (C) Province of British Columbia, 2013
 */
 
+/*
+
+TBD - adjust config if we are deployed on dotcloud
+
+*/
+
+
 
 var express = require('express')
   , app = express()
@@ -15,7 +22,8 @@ var express = require('express')
 
 var HOST_ID = 'example.a2p3.com'
   , LISTEN_PORT = 8080
-  , HOST_URL = 'http://localhost:8080'   // http://localhost:8080 if running locally
+//  , HOST_URL = 'http://localhost:8080' // if running locally
+  , HOST_URL = 'http://sample-dickhardt.dotcloud.com'
   , RESOURCES =
     [ 'http://email.a2p3.net/scope/default'
     , 'http://people.a2p3.net/scope/details'
@@ -30,8 +38,25 @@ var APIS =
   , 'http://health.a2p3.net/prov_number': null
   }
 
+// HTML for Agent Install Page
+// although we could use a template, this is the only thing we would use it for, so why bother
+var agentInstallHtmlStart ='<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;URL=\''
+var agentInstallHtmlEnd = '\'"> </head><body><iframe src="/agent/install"></iframe></body></html>'
+
+
 /*
-*   TBD -- explain the QR Session code below
+*  Users can use the Agent running on their mobile phone to log into a web site
+*  The server sends a qrURL down to the web page which draws a QR code
+*  When the WR reader on the Agent reads the QR code, it appends &json=true
+*  and the server then responds with a JSON response
+*  If the QR code is scanned with a standard reader, then the server returns
+*  the agent_install.html page which then tries to redirect the user to
+*  Agent scheme. If it is not successful, the User learns how to get an Agent
+*  for their phone
+*
+*  When an Agent is scanning the QR code, the User is running the App on a different
+*  device. We use the sessions object to pass the Agent Request and IX Token that
+*  we get from the Agent to the session where the App is running
 *
 */
 
@@ -63,9 +88,6 @@ function storeTokenRequest( qrSession, agentRequest, ixToken, callback ) {
 // login() - called by web app
 // creates an agentRequest and state
 function login( req, res )  {
-
-debugger;
-
   var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
   var qrSession = a2p3.random16bytes()
   req.session.qrSession = qrSession
@@ -85,10 +107,8 @@ function qrCode( req, res ) {
     res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
   } else {
     var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
-
-// TBD make this a page with a meta tag redirect so that User sees error in case
-// redirect does not work
-
+    var html = agentInstallHtmlStart + redirectURL + agentInstallHtmlEnd
+    res.send( html )
     res.redirect( redirectURL )
   }
 }
@@ -120,9 +140,6 @@ directly from the Agent and not via a redirect to our app
 */
 
 function loginResponse( req, res )  {
-
-debugger;
-
   var ixToken = req.query.token
   var agentRequest = req.query.request
   var qrSession = req.query.state
@@ -137,11 +154,6 @@ debugger;
     })
   } else {
     fetchProfile( agentRequest, ixToken, function ( error, results ) {
-
-console.log('fetchProfile')
-console.log('error:',error)
-console.log('results:',results)
-
       if ( error ) return res.redirect( '/error' )
       req.session.profile = results
       return res.redirect('/')
@@ -214,6 +226,7 @@ app.get('/logout', logout )
 app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html' ) } )
 app.get('/error', function( req, res ) { res.sendfile( __dirname + '/html/login_error.html' ) } )
 app.get('/complete', function( req, res ) { res.sendfile( __dirname + '/html/login_complete.html' ) } )
+app.get('/agent/install', function( req, res ) { res.sendfile( __dirname + '/html/agent_install.html' ) } )
 
 app.listen( LISTEN_PORT )
 
