@@ -10,13 +10,12 @@
 
 
 var express = require('express')
-  , async = require('async')
   , app = express()
   , a2p3 = require('a2p3') // change to 'a2p3' if using this as template
 
 var HOST_ID = 'example.a2p3.com'
   , LISTEN_PORT = 8080
-  , HOST_URL = 'http://a2p3sample-dickhardt.dotcloud.com'   // http://localhost:8080 if running locally
+  , HOST_URL = 'http://localhost:8080'   // http://localhost:8080 if running locally
   , RESOURCES =
     [ 'http://email.a2p3.net/scope/default'
     , 'http://people.a2p3.net/scope/details'
@@ -33,40 +32,66 @@ var EMAIL_RS  = 'email.a2p3.net'
   , SI_PROFILE_URL     = 'http://si.a2p3.net/number'
   , HEALTH_PROFILE_URL = 'http://health.a2p3.net/prov_number'
 
-var tinyURLs = {}
+/*
+*   TBD -- explain the QR Session code below
+*
+*/
+
+var QR_SESSION_LENGTH = a2p3.random16bytes().length
+// Global for holding QR sessions, need to put in DB if running mulitple instances
+// NOTE: DOES NOT SCALE AS CODED
+// checkForTokenRequest and storeTokenRequest are coded with callbacks so that
+// they can easily be implemented to store data in a DB
+var sessions = {}
+
+// checks if we are have received the IX Token and Agent Request from the Agent
+function checkForTokenRequest( qrSession, callback ) {
+  if ( !sessions[qrSession] ) return callback( null, null )
+  var agentRequest = sessions[qrSession].agentRequest
+  var ixToken = sessions[qrSession].ixToken
+  delete sessions[qrSession]
+  callback( ixToken, agentRequest )
+}
+
+// stores IX Token and Agent Request we received back channel from the Agent
+function storeTokenRequest( qrSession, agentRequest, ixToken, callback ) {
+  sessions[qrSession] =
+    { ixToken: ixToken
+    , agentRequest: agentRequest
+    }
+  callback( null )
+}
 
 // login() - called by web app
 // creates an agentRequest and state
 function login( req, res )  {
-  var request = new a2p3.Request(
-    { host: HOST_ID
-    , vault: __dirname + '/vault.json'
-    , ixURL: 'http://ix.a2p3.net'
-    })
-  var agentRequest = request.agent( HOST_URL + '/response', RESOURCES )
-  req.session.a2p3 = request.stringify()
-  var state = a2p3.random16bytes()
-  req.session.state = state
-  var tinyIndex = a2p3.random16bytes()
-  tinyURLs[tinyIndex] =
-    { fullURL: 'a2p3://token?request='+agentRequest+'&state='+state
-    , created: Date.now()
-    }
-  var tinyURL = HOST_URL + '/tiny/' + tinyIndex
-  res.send( { result: { agentRequest: agentRequest, state: state, tinyURL: tinyURL } } )
+
+debugger;
+
+  var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+  var qrSession = a2p3.random16bytes()
+  req.session.qrSession = qrSession
+  var qrCodeURL = HOST_URL + '/QR/' + qrSession
+  res.send( { result: { agentRequest: agentRequest, qrURL: qrCodeURL, qrSession: qrSession } } )
 }
 
-function tiny( req, res ) {
-  var tinyIndex = req.params.tiny
-  if ( tinyURLs[ tinyIndex ] ) {
-    res.redirect( tinyURLs[ tinyIndex ].fullURL )
-    delete tinyURLs[ tinyIndex ]
-    var expiryTime = Date.now() - 5*60*1000
-    Object.keys( tinyURLs ).forEach( function ( index ) {
-      if ( tinyURLs[ index ].createed < expiryTime ) delete tinyURLs[ index ]
-    })
+function qrCode( req, res ) {
+  var qrSession = req.params.qrSession
+  // make sure we got something that looks like a qrSession
+  if ( qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
+    return res.redirect('/error')
+  }
+  var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+  var json = req.body.json
+  if ( json ) {
+    res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
   } else {
-    res.redirect('/error')
+    var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
+
+// TBD make this a page with a meta tag redirect so that User sees error in case
+// redirect does not work
+
+    res.redirect( redirectURL )
   }
 }
 
@@ -76,85 +101,88 @@ function logout( req, res )  {
   res.redirect('/')
 }
 
-// exchange IX Token for RS Tokens and send appropriate redirect response
-function exchangeToken ( req, res ) {
-  var request = new a2p3.Request( req.session.a2p3 )
-  var token = req.query.token
-  request.exchange( token, function ( e, identifer ) {
-    req.session.a2p3 = request.stringify()
-    if ( e ) return res.redirect('/error')
-    req.session.tokens = true
-    return res.redirect('/')
+function fetchProfile( agentRequest, ixToken, callback ) {
+  var resource = new a2p3.Resource()
+  resource.exchange( agentRequest, ixToken, function ( error, di ) {
+    if ( error ) return callback ( error )
+    var userDI = di // App's directed identifier for User
+    resource.call( PEOPLE_PROFILE_URL, function ( error, results ) {
+      if (results)
+        results['ix.a2p3.net'] = { di: userDI }
+      callback( error, results )
+    })
   })
 }
 
+
 /*
-* loginResponse() - gets response from agent, or calls from web app
-*
-* if receives:
-* - token: web app invoked agent and this is the IX Token, all done
-* - state: web app showed QR code, and we need to wait to get the IX Token from the agent
-* - state & token: this comes from the agent that scanned a QR code and we bind IX Token
-*                   to a call that just has state
+if we are getting a state parameter, we are getting the data
+directly from the Agent and not via a redirect to our app
+
 */
 
-var EventEmitter = require('events').EventEmitter   // does not scale past one machine
-var tokenChannel = new EventEmitter()               // use events to pass token between agent and web app
-
 function loginResponse( req, res )  {
-  var token = req.query.token
-  var state = req.query.state
-  if (  state ) {
-    if ( token ) {  // agent is sending us the token directly, send token over tokenChannel
-      tokenChannel.emit( state, token)
-      res.redirect('/complete') // send browser on agent to a complete page
-    } else {
-      // w ait to get token from tokenChannel
-      token.channel.once( state, function ( token ) {
-        req.query.token = token
-        return exchangeToken( req, res )
-      })
-    }
-  } else if ( token ) {
-    return exchangeToken( req, res )
+
+debugger;
+
+  var ixToken = req.query.token
+  var agentRequest = req.query.request
+  var qrSession = req.query.state
+
+  if (!ixToken || !agentRequest) {
+    return res.redirect( '/error' )
+  }
+  if ( qrSession ) {
+    storeTokenRequest( qrSession, agentRequest, ixToken, function ( error ) {
+      if ( error ) return res.redirect( '/error' )
+      return res.redirect( '/complete' )
+    })
   } else {
-    // did not get anything we expected
-    res.redirect('/error')
+    fetchProfile( agentRequest, ixToken, function ( error, results ) {
+      if ( error ) return res.redirect( '/error' )
+      req.session.profile = results
+      return res.redirect('/')
+    })
   }
 }
 
 
 
-function fetchProfile( tokens, a2p3String, callback ) {
-  var request = new a2p3.Request( a2p3String )
-  var tasks = {}
-  tasks[ EMAIL_RS ] = function ( done ) { request.call( EMAIL_PROFILE_URL, done ) }
-  tasks[ PEOPLE_RS ] = function ( done ) { request.call( PEOPLE_PROFILE_URL, done ) }
-  tasks[ SI_RS ] = function ( done ) { request.call( SI_PROFILE_URL, done ) }
-  tasks[ HEALTH_RS ] = function ( done ) { request.call( HEALTH_PROFILE_URL, done ) }
-  async.parallel( tasks, callback )
+
+function checkQR( req, res ) {
+  if (!req.body.qrSession)
+    return res.send( { error: 'No QR Session provided' } )
+    checkForTokenRequest( req.body.qrSession, function ( ixToken, agentRequest ) {
+      if (!ixToken || !agentRequest) {
+        return res.send( { status: 'waiting'} )
+      }
+      fetchProfile( agentRequest, ixToken, function ( error, results ) {
+        var response = {}
+        if ( error ) response.error = error
+        if ( results ) {
+          response.result = results
+          req.session.profile = results
+        }
+        return res.send( response )
+      })
+    })
+
 }
 
+
 function profile( req, res )  {
-  if ( req.session.tokens ) {
-    fetchProfile( req.session.tokens, req.session.a2p3, function ( e, profile ) {
-      delete req.session.tokens
-      if ( e ) return res.send( { error: e, result: profile } )
-      req.session.profile = profile
-      return res.send( { result: profile } )
-    })
-  } else if ( req.session.profile ) { // already have profile, send it
+  if ( req.session.profile ) {
     return res.send( { result: req.session.profile } )
-  } else { // not logged in
+  } else { //
     return res.send( { errror: 'NOT_LOGGED_IN'} )
   }
 }
 
 // set up middleware
 
-app.use( express.static( __dirname + '/html/assets' ) )  // put static assets here
-app.use( express.logger( 'dev' ) )                         // so that we only log page requests
-app.use( express.limit('10kb') )                    // protect against large POST attack
+app.use( express.static( __dirname + '/html/assets' ) )   // put static assets here
+app.use( express.logger( 'dev' ) )                        // so that we only log page requests
+app.use( express.limit('10kb') )                          // protect against large POST attack
 app.use( express.bodyParser() )
 
 app.use( express.cookieParser() )                   // This does not scale to more than one machine
@@ -165,14 +193,19 @@ app.use( express.cookieSession( cookieOptions ))
 
 //setup request routes
 
-// these end points are all AJAX calls from the web app and have JSON response
+// these end points are all AJAX calls from the web app and return a JSON response
 app.get('/login', login )
 app.get('/profile', profile )
+app.post('/check/QR', checkQR )
+
+// this page is called by either the Agent or a QR Code reader
+// returns either the Agent Request in JSON if called by Agent
+// or sends a redirect to the a2p3.net://token URL
+app.get('/QR/:state', qrCode )
 
 // these pages change state and return a redirect
 app.get('/response', loginResponse )
 app.get('/logout', logout )
-app.get('/tiny/:index', tiny )
 
 // these endpoints serve static HTML pages
 app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html' ) } )
