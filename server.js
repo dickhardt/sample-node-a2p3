@@ -21,7 +21,8 @@ var express = require('express')
   , a2p3 = require('a2p3') // change to 'a2p3' if using this as template
 
 var LISTEN_PORT = 8080
-  , HOST_URL = 'http://localhost:8080'    // for running locally
+//  , HOST_URL = 'http://localhost:8080'    // for running locally
+var HOST_URL = 'http://macpro.local:8080'    // for running locally
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
   HOST_URL = process.env.DOTCLOUD_WWW_HTTP_URL
@@ -101,18 +102,17 @@ function login( req, res )  {
 function qrCode( req, res ) {
   var qrSession = req.params.qrSession
   // make sure we got something that looks like a qrSession
-  if ( qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
+  if ( !qrSession || qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
     return res.redirect('/error')
   }
   var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
   var json = req.body.json
   if ( json ) {
-    res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
+    return res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
   } else {
     var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
     var html = agentInstallHtmlStart + redirectURL + agentInstallHtmlEnd
-    res.send( html )
-    res.redirect( redirectURL )
+    return res.send( html )
   }
 }
 
@@ -219,7 +219,7 @@ app.post('/check/QR', checkQR )
 // this page is called by either the Agent or a QR Code reader
 // returns either the Agent Request in JSON if called by Agent
 // or sends a redirect to the a2p3.net://token URL
-app.get('/QR/:state', qrCode )
+app.get('/QR/:qrSession', qrCode )
 
 // these pages change state and return a redirect
 app.get('/response', loginResponse )
