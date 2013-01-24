@@ -23,14 +23,12 @@ var HOST_ID = 'example.a2p3.com'
     , 'http://health.a2p3.net/scope/prov_number'
     ]
 
-var EMAIL_RS  = 'email.a2p3.net'
-  , PEOPLE_RS = 'people.a2p3.net'
-  , SI_RS     = 'si.a2p3.net'
-  , HEALTH_RS = 'health.a2p3.net'
-  , EMAIL_PROFILE_URL  = 'http://email.a2p3.net/email/default'
-  , PEOPLE_PROFILE_URL = 'http://people.a2p3.net/details'
-  , SI_PROFILE_URL     = 'http://si.a2p3.net/number'
-  , HEALTH_PROFILE_URL = 'http://health.a2p3.net/prov_number'
+var APIS =
+  { 'http://email.a2p3.net/email/default': null
+  , 'http://people.a2p3.net/details': null
+  , 'http://si.a2p3.net/number': null
+  , 'http://health.a2p3.net/prov_number': null
+  }
 
 /*
 *   TBD -- explain the QR Session code below
@@ -106,7 +104,7 @@ function fetchProfile( agentRequest, ixToken, callback ) {
   resource.exchange( agentRequest, ixToken, function ( error, di ) {
     if ( error ) return callback ( error )
     var userDI = di // App's directed identifier for User
-    resource.call( PEOPLE_PROFILE_URL, function ( error, results ) {
+    resource.callMultiple( APIS, function ( error, results ) {
       if (results)
         results['ix.a2p3.net'] = { di: userDI }
       callback( error, results )
@@ -139,6 +137,11 @@ debugger;
     })
   } else {
     fetchProfile( agentRequest, ixToken, function ( error, results ) {
+
+console.log('fetchProfile')
+console.log('error:',error)
+console.log('results:',results)
+
       if ( error ) return res.redirect( '/error' )
       req.session.profile = results
       return res.redirect('/')
