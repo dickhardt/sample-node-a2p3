@@ -22,6 +22,6 @@
 , "scripts":
   { "test": "mocha"
   , "postinstall": "node setup/copy.js ./node_modules/a2p3/config.json config.json"
-  , "register": "node ./node_modules/a3p3/setup/register.js config.json"
+  , "register": "node ./node_modules/a2p3/setup/register.js config.json"
   }
 }

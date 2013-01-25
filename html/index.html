@@ -4,7 +4,7 @@
 <style type="text/css">
   .loginStatus {text-align:right;}
   .loginItem {padding-left: 5px;}
-  #qrcodeForm{border:1px solid #999; -webkit-box-shadow: 0px 0px 6px #CCC; background-color:#FFF; width:500px; height:580px; position: absolute; top:25px; left:10%; margin-left:-50px; padding:10px; border-radius:4px;}
+  #qrcodeForm{border:1px solid #999; -webkit-box-shadow: 0px 0px 6px #CCC; background-color:#FFF; width:500px; height:550px; position: absolute; top:25px; left:10%; margin-left:-50px; padding:10px; border-radius:4px;}
 </style>
 
 </head>
@@ -14,15 +14,12 @@
 
 <div class="loginStatus">
   <a href="" id="login" class="loginItem"> login </a>
+  <a href="/login/backdoor" id="loginBackdoor" class="loginItem"> login backdoor </a>
   <a href="/logout" id="logout" class="loginItem">logout </a>
 </div>
 
 <div id="qrcodeForm">
-    <p>Scan QR Code to login or</p>
-    <p>
-      <a href="" id="loginBackdoor"> backdoor login </a>
-        <a href="" id="loginMobile" class="loginStatus"> mobile agent login </a>
-    </p>
+    <p>Scan QR Code with your Agent to login</p>
     <div id="qrcode"></div>
 </div>
 
@@ -37,13 +34,14 @@
 
 function onReady() {
 
+  // TBD: detect if we are running on a mobile device, perhaps a a2p3.js client?
+  var agentDirect = false
+
   $('#qrcodeForm').hide()
   $('#logout').hide()
 
   function drawProfile( profile ) {
-
-console.log( profile )
-
+    console.log( profile )
     Object.keys( profile ).forEach( function ( rs ) {
       $('#profileTable').append('<tr><td>' + rs + '</td><td></td><td></td></tr>')
       Object.keys( profile[rs] ).forEach( function ( item ) {
@@ -52,6 +50,7 @@ console.log( profile )
     })
   }
 
+  // function that polls to see if we are logged in yet
   function checkQR ( qrSession ) {
     $.post( '/check/QR', { qrSession: qrSession }, function ( data, status ) {
       if ( status == 'success' && data) {
@@ -64,27 +63,28 @@ console.log( profile )
   }
 
   $('#login').click( function () {
-    $.get( '/login', function ( data, status ) {
-      if (status == "success" && !data.error && data.result
-      && data.result.agentRequest && data.result.qrURL && data.result.qrSession) {   // TBD, deal with error
-        var agentURL = 'a2p3://token?request=' + data.result.agentRequest
-        var backdoorURL = 'http://setup.a2p3.net/backdoor/login?request=' + data.result.agentRequest
-        $('#loginMobile').attr( 'href', agentURL )
-        $('#loginBackdoor').attr( 'href', backdoorURL )
-        $('#qrcode').empty()
-        $('#qrcodeForm').fadeIn('fast')
-        $('#qrcode').qrcode( {width: 500, height: 500, text: data.result.qrURL } )
-        setTimeout( checkQR, 500, data.result.qrSession )
-      }
-    })
+    if (agentDirect) {
+      window.location = '/login/direct'
+    } else {  // put up QR code
+      $.get( '/login/QR', function ( data, status ) {
+        if (status == "success" && !data.error && data.result && data.result.qrURL ) {
+          $('#qrcode').empty()
+          $('#qrcodeForm').fadeIn('fast')
+          $('#qrcode').qrcode( {width: 500, height: 500, text: data.result.qrURL } )
+          setTimeout( checkQR, 500, data.result.qrSession )
+        }
+      })
+    }
     return false
   })
 
+  // see if we have a profile to show on a reload
   $.get( '/profile', function ( data, status ) {
     console.log( '/profile ->', data )
     if (status == "success" && !data.error && data.result ) {   // TBD, deal with error
       $('#logout').show()
       $('#login').hide()
+      $('#loginBackdoor').hide()
       drawProfile( data.result )
     }
   })

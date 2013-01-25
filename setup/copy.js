@@ -18,4 +18,7 @@ if (!fs.existsSync(source)) {
 if (!fs.existsSync(destination)) {
   var data = fs.readFileSync( source )
   fs.writeFileSync( destination, data )
+  console.log('Remember to insert your CLI device ID into config.json.')
+} else {
+  console.log('Using existing config.json.')
 }

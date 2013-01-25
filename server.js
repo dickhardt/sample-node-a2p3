@@ -8,16 +8,10 @@
 * Copyright (C) Province of British Columbia, 2013
 */
 
-/*
-
-TBD - adjust config if we are deployed on dotcloud
-
-*/
-
-
 
 var express = require('express')
   , app = express()
+  , fs = require('fs')
   , a2p3 = require('a2p3')
 
 // make sure you have a config.json and vault.json per a2p3 documentation
@@ -45,10 +39,10 @@ var APIS =
   , 'http://health.a2p3.net/prov_number': null
   }
 
-// HTML for Agent Install Page
-// although we could use a template, this is the only thing we would use it for, so why bother
-var agentInstallHtmlStart ='<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;URL=\''
-var agentInstallHtmlEnd = '\'"> </head><body><iframe src="/agent/install"></iframe></body></html>'
+// HTML for meta refresh and Agent Install Page
+// we could read this in once, but reading it in each
+// time makes it easy to edit and reload for development
+var META_REFRESH_HTML_FILE = __dirname + '/html/meta_refresh.html'
 
 
 /*
@@ -67,7 +61,9 @@ var agentInstallHtmlEnd = '\'"> </head><body><iframe src="/agent/install"></ifra
 *
 */
 
+// calculate this once
 var QR_SESSION_LENGTH = a2p3.random16bytes().length
+
 // Global for holding QR sessions, need to put in DB if running mulitple instances
 // NOTE: DOES NOT SCALE AS CODED
 // checkForTokenRequest and storeTokenRequest are coded with callbacks so that
@@ -92,37 +88,10 @@ function storeTokenRequest( qrSession, agentRequest, ixToken, callback ) {
   callback( null )
 }
 
-// login() - called by web app
-// creates an agentRequest and state
-function login( req, res )  {
-  var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
-  var qrSession = a2p3.random16bytes()
-  req.session.qrSession = qrSession
-  var qrCodeURL = HOST_URL + '/QR/' + qrSession
-  res.send( { result: { agentRequest: agentRequest, qrURL: qrCodeURL, qrSession: qrSession } } )
-}
-
-function qrCode( req, res ) {
-  var qrSession = req.params.qrSession
-  // make sure we got something that looks like a qrSession
-  if ( !qrSession || qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
-    return res.redirect('/error')
-  }
-  var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
-  var json = req.body.json
-  if ( json ) {
-    return res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
-  } else {
-    var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
-    var html = agentInstallHtmlStart + redirectURL + agentInstallHtmlEnd
-    return res.send( html )
-  }
-}
-
-// clear session, logout user
-function logout( req, res )  {
-  req.session = null
-  res.redirect('/')
+// metaRedirectInfoPage() returns a meta-refresh page with the supplied URL
+function metaRedirectInfoPage ( redirectURL ) {
+  var html = fs.readFileSync( META_REFRESH_HTML_FILE, 'utf8' )
+  return html.replace( '$REDIRECT_URL', redirectURL )
 }
 
 function fetchProfile( agentRequest, ixToken, callback ) {
@@ -140,9 +109,69 @@ function fetchProfile( agentRequest, ixToken, callback ) {
 
 
 /*
+*   request handlers
+*/
+
+// loginQR() - called by web app when it wants a QR code link
+// creates an agentRequest and state
+function loginQR( req, res )  {
+  var qrSession = a2p3.random16bytes()
+  req.session.qrSession = qrSession
+  var qrCodeURL = HOST_URL + '/QR/' + qrSession
+  res.send( { result: { qrURL: qrCodeURL } } )
+}
+
+// loginDirect -- loaded when web app thinks it is running on a mobile device that
+// can support the agent
+// we send a meta-refresh so that we show a info page in case there is no agent to
+// handle the a2p3.net: protcol scheme
+function loginDirect( req, res ) {
+  var redirectURL = 'a2p3.net://token?request=' +
+    a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+  var html = metaRedirectInfoPage( redirectURL )
+  res.send( html )
+}
+
+// loginBackdoor -- development login that uses a development version of setup.a2p3.net
+function loginBackdoor( req, res )  {
+  var redirectURL = 'http://setup.a2p3.net/backdoor/login?request=' +
+    a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+  res.redirect( redirectURL )
+}
+
+
+// clear session, logout user
+function logout( req, res )  {
+  req.session = null
+  res.redirect('/')
+}
+
+
+// QR Code was scanned
+// if scanned by Agent, then 'json=true' has been set and we return the Agent Request in JSON
+// if scanned by a general QR reader, then return a meta refresh page with Agent Reqeuest and
+// and state parameter of qrSession so we can link the response from the Agent
+// back to this web app session in checkQR
+function qrCode( req, res ) {
+  var qrSession = req.params.qrSession
+  // make sure we got something that looks like a qrSession
+  if ( !qrSession || qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
+    return res.redirect('/error')
+  }
+  var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+  var json = req.body.json
+  if ( json ) {
+    return res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
+  } else {
+    var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
+    var html =  metaRedirectInfoPage( redirectURL )
+    return res.send( html )
+  }
+}
+
+/*
 if we are getting a state parameter, we are getting the data
 directly from the Agent and not via a redirect to our app
-
 */
 
 function loginResponse( req, res )  {
@@ -215,7 +244,7 @@ app.use( express.cookieSession( cookieOptions ))
 //setup request routes
 
 // these end points are all AJAX calls from the web app and return a JSON response
-app.get('/login', login )
+app.get('/login/QR', loginQR )
 app.get('/profile', profile )
 app.post('/check/QR', checkQR )
 
@@ -224,7 +253,10 @@ app.post('/check/QR', checkQR )
 // or sends a redirect to the a2p3.net://token URL
 app.get('/QR/:qrSession', qrCode )
 
-// these pages change state and return a redirect
+
+// these pages return a redirect
+app.get('/login/backdoor', loginBackdoor)
+app.get('/login/direct', loginDirect)
 app.get('/response', loginResponse )
 app.get('/logout', logout )
 
@@ -233,6 +265,10 @@ app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html'
 app.get('/error', function( req, res ) { res.sendfile( __dirname + '/html/login_error.html' ) } )
 app.get('/complete', function( req, res ) { res.sendfile( __dirname + '/html/login_complete.html' ) } )
 app.get('/agent/install', function( req, res ) { res.sendfile( __dirname + '/html/agent_install.html' ) } )
+
+
+app.get('/test', function( req, res ) { res.sendfile( __dirname + '/html/test.html' ) } )
+
 
 app.listen( LISTEN_PORT )
 
