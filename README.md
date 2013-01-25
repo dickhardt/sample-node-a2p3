@@ -2,13 +2,47 @@ sample-node-a2p3
 ================
 
 Sample application for A2P3
+##Prerequsites
+- git
 
-#### config.json
+- node 0.8.x or later
 
-The config.json file is used by `register.js` to generate the `vault.json` file, and is passed to modules to configure how calls are made. Looked at the `server.js` source to see other defaults that can be changed for more complex development environments.
+- Facebook account
 
+####Optional
+- [DotCloud](http://dotcloud.com) account
 
-## Related
+##Install and Setup
+1) `git clone git://github.com/dickhardt/sample-node-a2p3.git`
+
+2) `cd sample-node-a2p3`
+
+3) `npm install`
+
+4) Register if need be at [setup.a2p3.net](http://setup.a2p3.net) and create a CLI Agent and save the device parameter
+
+5) Edit config.json and insert the device parameter
+
+6) `npm run-script register` to create the vault.json file
+
+7) `npm start` will start the server locally
+
+##DotCloud Deployment
+
+1) Register at [DotCloud](http://dotcloud.com) for a free account and install the dotcloud CLI
+
+2) `dotcloud create sample` answer yes to 
+
+3) `dotcloud push` will deploy to dotcloud and show you the URL it is running at
+
+####config.json and vault.json
+See [node-a2p3](https://github.com/dickhardt/node-a2p3) for details
+
+##How it Works
+
+TBD
+
+##Related
 
 [A2P3.CA](http://a2p3.ca) A2P3 project home page
 
