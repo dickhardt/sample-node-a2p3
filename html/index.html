@@ -34,8 +34,11 @@
 
 function onReady() {
 
-  // TBD: detect if we are running on a mobile device, perhaps a a2p3.js client?
-  var agentDirect = false
+  // check if are running on iOS or android, only agent platforms currently supported
+  var deviceAgent = navigator.userAgent.toLowerCase()
+  var iOS = deviceAgent.match(/(iphone|ipod|ipad)/)
+  var isAndroid = deviceAgent.indexOf("android") > -1
+  var agentDirect = iOS || isAndroid
 
   $('#qrcodeForm').hide()
   $('#logout').hide()
