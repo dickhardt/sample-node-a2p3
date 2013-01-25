@@ -18,7 +18,10 @@ TBD - adjust config if we are deployed on dotcloud
 
 var express = require('express')
   , app = express()
-  , a2p3 = require('a2p3') // change to 'a2p3' if using this as template
+  , a2p3 = require('a2p3')
+
+// make sure you have a config.json and vault.json per a2p3 documentation
+a2p3.init( require('./config.json'), require('./vault.json'))
 
 var LISTEN_PORT = 8080
 //  , HOST_URL = 'http://localhost:8080'    // for running locally
