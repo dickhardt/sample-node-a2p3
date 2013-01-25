@@ -12,14 +12,17 @@
 var express = require('express')
   , app = express()
   , fs = require('fs')
+  , os = require('os')
   , a2p3 = require('a2p3')
 
 // make sure you have a config.json and vault.json per a2p3 documentation
 a2p3.init( require('./config.json'), require('./vault.json'))
 
 var LISTEN_PORT = 8080
-//  , HOST_URL = 'http://localhost:8080'    // for running locally
-var HOST_URL = 'http://macpro.local:8080'    // for running locally
+
+var host = os.hostname() || 'localhost'
+
+var HOST_URL = 'http://' + host + ':' + LISTEN_PORT    // for running locally
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
   HOST_URL = process.env.DOTCLOUD_WWW_HTTP_URL
