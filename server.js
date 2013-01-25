@@ -162,7 +162,7 @@ function qrCode( req, res ) {
     return res.redirect('/error')
   }
   var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
-  var json = req.body.json
+  var json = req.query.json
   if ( json ) {
     return res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
   } else {
