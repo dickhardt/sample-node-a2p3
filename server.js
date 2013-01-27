@@ -20,14 +20,21 @@ a2p3.init( require('./config.json'), require('./vault.json'))
 
 var LISTEN_PORT = 8080
 
-var host = os.hostname() || 'localhost'
-
-var HOST_URL = 'http://' + host + ':' + LISTEN_PORT    // for running locally
+var HOST_URL = null
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
   HOST_URL = process.env.DOTCLOUD_WWW_HTTP_URL
   LISTEN_PORT = 8080
 }
+
+function makeHostUrl (req) {
+  if (HOST_URL) return HOST_URL
+  // make URL from URL we are running on
+  var hostURL = req.protocol + '://' + req.host
+  if (LISTEN_PORT) hostURL += ':' + LISTEN_PORT
+  return hostURL
+}
+
 var RESOURCES =
     [ 'http://email.a2p3.net/scope/default'
     , 'http://people.a2p3.net/scope/details'
@@ -120,7 +127,7 @@ function fetchProfile( agentRequest, ixToken, callback ) {
 function loginQR( req, res )  {
   var qrSession = a2p3.random16bytes()
   req.session.qrSession = qrSession
-  var qrCodeURL = HOST_URL + '/QR/' + qrSession
+  var qrCodeURL = makeHostUrl( req ) + '/QR/' + qrSession
   res.send( { result: { qrURL: qrCodeURL } } )
 }
 
@@ -130,7 +137,7 @@ function loginQR( req, res )  {
 // handle the a2p3.net: protcol scheme
 function loginDirect( req, res ) {
   var redirectURL = 'a2p3.net://token?request=' +
-    a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+    a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
   var html = metaRedirectInfoPage( redirectURL )
   res.send( html )
 }
@@ -138,7 +145,7 @@ function loginDirect( req, res ) {
 // loginBackdoor -- development login that uses a development version of setup.a2p3.net
 function loginBackdoor( req, res )  {
   var redirectURL = 'http://setup.a2p3.net/backdoor/login?request=' +
-    a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+    a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
   res.redirect( redirectURL )
 }
 
@@ -275,4 +282,4 @@ app.get('/test', function( req, res ) { res.sendfile( __dirname + '/html/test.ht
 
 app.listen( LISTEN_PORT )
 
-console.log('\nSample App started and listening on ', HOST_URL)
+console.log('\nSample App started and listening on ', LISTEN_PORT )
