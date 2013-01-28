@@ -81,21 +81,31 @@ var QR_SESSION_LENGTH = a2p3.random16bytes().length
 var sessions = {}
 
 // checks if we are have received the IX Token and Agent Request from the Agent
-function checkForTokenRequest( qrSession, callback ) {
+function checkForTokenRequest ( qrSession, callback ) {
   if ( !sessions[qrSession] ) return callback( null, null )
-  var agentRequest = sessions[qrSession].agentRequest
-  var ixToken = sessions[qrSession].ixToken
+  var data = JSON.parse( JSON.stringify( sessions[qrSession] ) )
   delete sessions[qrSession]
-  callback( ixToken, agentRequest )
+  callback( data )
 }
 
 // stores IX Token and Agent Request we received back channel from the Agent
-function storeTokenRequest( qrSession, agentRequest, ixToken, callback ) {
-  sessions[qrSession] =
-    { ixToken: ixToken
-    , agentRequest: agentRequest
-    }
+function storeTokenRequest ( qrSession, agentRequest, ixToken, notificationURL, callback ) {
+  sessions[qrSession] = sessions[qrSession] || {} // we might have a remember property stored
+  sessions[qrSession].ixToken = ixToken
+  sessions[qrSession].agentRequest = agentRequest
+  sessions[qrSession].notificationURL = notificationURL
   callback( null )
+}
+
+function storeRememberMe ( qrSession, remember, callback ) {
+  sessions[qrSession] = sessions[qrSession] || {}
+  sessions[qrSession].remember = remember
+  callback( null )
+}
+
+function checkRememberMe ( qrSession, callback ) {
+  var remember = sessions[qrSession] && sessions[qrSession].remember
+  callback( null, remember )
 }
 
 // metaRedirectInfoPage() returns a meta-refresh page with the supplied URL
@@ -168,15 +178,25 @@ function qrCode( req, res ) {
   if ( !qrSession || qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
     return res.redirect('/error')
   }
-  var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
-  var json = req.query.json
-  if ( json ) {
-    return res.send( { result: { agentRequest: agentRequest, state: qrSession } } )
-  } else {
-    var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
-    var html =  metaRedirectInfoPage( redirectURL )
-    return res.send( html )
-  }
+  checkRememberMe( qrSession, function ( e, remember ) {
+
+console.log('qrCode',remember)
+
+    // ignore error since we can't do anything about it
+    var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+    var json = req.query.json
+    if ( json ) {
+      var response = { result: { agentRequest: agentRequest, state: qrSession } }
+      if (remember) response.result.notificationURL = true
+      return res.send( response )
+    } else {
+      var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
+      if (remember) redirectURL += '&notificationURL=true'
+      var html =  metaRedirectInfoPage( redirectURL )
+      return res.send( html )
+    }
+  })
+
 }
 
 /*
@@ -188,16 +208,18 @@ function loginResponse( req, res )  {
   var ixToken = req.query.token
   var agentRequest = req.query.request
   var qrSession = req.query.state
+  var notificationURL = req.query.notificationURL
 
   if (!ixToken || !agentRequest) {
     return res.redirect( '/error' )
   }
   if ( qrSession ) {
-    storeTokenRequest( qrSession, agentRequest, ixToken, function ( error ) {
+    storeTokenRequest( qrSession, agentRequest, ixToken, notificationURL, function ( error ) {
       if ( error ) return res.redirect( '/error' )
       return res.redirect( '/complete' )
     })
   } else {
+    // NOTE: we should not get a notificationURL here as we came back direct, not a QR scan
     fetchProfile( agentRequest, ixToken, function ( error, results ) {
       if ( error ) return res.redirect( '/error' )
       req.session.profile = results
@@ -212,21 +234,33 @@ function loginResponse( req, res )  {
 function checkQR( req, res ) {
   if (!req.body.qrSession)
     return res.send( { error: 'No QR Session provided' } )
-    checkForTokenRequest( req.body.qrSession, function ( ixToken, agentRequest ) {
-      if (!ixToken || !agentRequest) {
-        return res.send( { status: 'waiting'} )
-      }
-      fetchProfile( agentRequest, ixToken, function ( error, results ) {
-        var response = {}
-        if ( error ) response.error = error
-        if ( results ) {
-          response.result = results
-          req.session.profile = results
-        }
-        return res.send( response )
-      })
-    })
+  checkForTokenRequest( req.body.qrSession, function ( response ) {
+    if (!response) {
+      return res.send( { status: 'waiting'} )
+    }
 
+// TBD: save notificationURL to cookie or something so we can remember user
+
+    fetchProfile( response.agentRequest, response.ixToken, function ( error, results ) {
+      var response = {}
+      if ( error ) response.error = error
+      if ( results ) {
+        response.result = results
+        req.session.profile = results
+      }
+      return res.send( response )
+    })
+  })
+}
+
+function rememberMe( req, res ) {
+  var remember = req.body.remember
+  var qrSession = req.session.qrSession
+  if (!remember || !qrSession) return res.send({ error: 'no remember or QR session'})
+  storeRememberMe( qrSession, remember, function ( e ) {
+    if (e) return res.send( { error: e  } )
+    return res.send( { result: { success: true } } )
+  })
 }
 
 
@@ -257,6 +291,7 @@ app.use( express.cookieSession( cookieOptions ))
 app.get('/login/QR', loginQR )
 app.get('/profile', profile )
 app.post('/check/QR', checkQR )
+app.post('/remember/me', rememberMe )
 
 // this page is called by either the Agent or a QR Code reader
 // returns either the Agent Request in JSON if called by Agent
