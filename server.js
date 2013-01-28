@@ -23,7 +23,7 @@ var LISTEN_PORT = 8080
 var HOST_URL = null
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
-  HOST_URL = process.env.DOTCLOUD_WWW_HTTP_URL
+  HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
   LISTEN_PORT = 8080
 }
 
