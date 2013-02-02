@@ -182,7 +182,7 @@ function qrCode( req, res ) {
 console.log('qrCode',remember)
 
     // ignore error since we can't do anything about it
-    var agentRequest = a2p3.createAgentRequest( HOST_URL + '/response', RESOURCES )
+    var agentRequest = a2p3.createAgentRequest( makeHostUrl() + '/response', RESOURCES )
     var json = req.query.json
     if ( json ) {
       var response = { result: { agentRequest: agentRequest, state: qrSession } }
