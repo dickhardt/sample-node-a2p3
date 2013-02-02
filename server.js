@@ -81,29 +81,29 @@ var sessions = {}
 
 // checks if we are have received the IX Token and Agent Request from the Agent
 function checkForTokenRequest ( qrSession, callback ) {
-  if ( !sessions[qrSession] ) return callback( null, null )
-  var data = JSON.parse( JSON.stringify( sessions[qrSession] ) )
-  delete sessions[qrSession]
+  if ( !sessions[ qrSession ] || !sessions[ qrSession ].ixToken ) return callback( null, null )
+  var data = JSON.parse( JSON.stringify( sessions[ qrSession ] ) )
+  delete sessions[ qrSession ]
   callback( data )
 }
 
 // stores IX Token and Agent Request we received back channel from the Agent
 function storeTokenRequest ( qrSession, agentRequest, ixToken, notificationURL, callback ) {
-  sessions[qrSession] = sessions[qrSession] || {} // we might have a remember property stored
-  sessions[qrSession].ixToken = ixToken
-  sessions[qrSession].agentRequest = agentRequest
-  sessions[qrSession].notificationURL = notificationURL
+  sessions[ qrSession ] = sessions[ qrSession ] || {} // we might have a remember property stored
+  sessions[ qrSession ].ixToken = ixToken
+  sessions[ qrSession ].agentRequest = agentRequest
+  sessions[ qrSession ].notificationURL = notificationURL
   callback( null )
 }
 
 function storeRememberMe ( qrSession, remember, callback ) {
-  sessions[qrSession] = sessions[qrSession] || {}
-  sessions[qrSession].remember = remember
+  sessions[ qrSession ] = sessions[ qrSession ] || {}
+  sessions[ qrSession ].remember = remember
   callback( null )
 }
 
 function checkRememberMe ( qrSession, callback ) {
-  var remember = sessions[qrSession] && sessions[qrSession].remember
+  var remember = sessions[ qrSession ] && sessions[ qrSession ].remember
   callback( null, remember )
 }
 
@@ -137,7 +137,7 @@ function loginQR( req, res )  {
   var qrSession = a2p3.random16bytes()
   req.session.qrSession = qrSession
   var qrCodeURL = makeHostUrl( req ) + '/QR/' + qrSession
-  res.send( { result: { qrURL: qrCodeURL } } )
+  res.send( { result: { qrURL: qrCodeURL, qrSession: qrSession } } )
 }
 
 // loginDirect -- loaded when web app thinks it is running on a mobile device that
@@ -145,16 +145,16 @@ function loginQR( req, res )  {
 // we send a meta-refresh so that we show a info page in case there is no agent to
 // handle the a2p3.net: protcol scheme
 function loginDirect( req, res ) {
-  var redirectURL = 'a2p3.net://token?request=' +
-    a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
+  var agentRequest = a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
+  var redirectURL = 'a2p3.net://token?request=' + agentRequest
   var html = metaRedirectInfoPage( redirectURL )
   res.send( html )
 }
 
 // loginBackdoor -- development login that uses a development version of setup.a2p3.net
 function loginBackdoor( req, res )  {
-  var redirectURL = 'http://setup.a2p3.net/backdoor/login?request=' +
-    a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
+  var agentRequest = a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
+  var redirectURL = 'http://setup.a2p3.net/backdoor/login?request=' + agentRequest
   res.redirect( redirectURL )
 }
 
@@ -256,6 +256,9 @@ function rememberMe( req, res ) {
   var remember = req.body.remember
   var qrSession = req.session.qrSession
   if (!remember || !qrSession) return res.send({ error: 'no remember or QR session'})
+
+console.log('\nrememberMe remember',remember,' qrSession:',qrSession)
+
   storeRememberMe( qrSession, remember, function ( e ) {
     if (e) return res.send( { error: e  } )
     return res.send( { result: { success: true } } )
@@ -295,6 +298,7 @@ app.post('/remember/me', rememberMe )
 // this page is called by either the Agent or a QR Code reader
 // returns either the Agent Request in JSON if called by Agent
 // or sends a redirect to the a2p3.net://token URL
+// also called by the Agent via the notification URL mechanism
 app.get('/QR/:qrSession', qrCode )
 
 
