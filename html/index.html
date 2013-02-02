@@ -53,10 +53,14 @@ function onReady() {
 
   function drawProfile( profile ) {
     console.log( profile )
-    Object.keys( profile ).forEach( function ( rs ) {
+    $.each( profile, function ( rs ) {
       $('#profileTable').append('<tr><td>' + rs + '</td><td></td><td></td></tr>')
-      Object.keys( profile[rs] ).forEach( function ( item ) {
-        $('#profileTable').append('<tr><td></td><td>' + item + '</td><td>' + profile[rs][item] + '</td></tr>')
+      $.each( profile[rs], function ( item, value ) {
+        if (item !== 'photo') {
+          $('#profileTable').append('<tr><td></td><<td>' + item + '</td><td>' + value + '</td></tr>')
+        } else {
+          $('#profileTable').append('<tr><td></td><<td>' + item + '</td><td><img src="' + value + '"></td></tr>')
+        }
       })
     })
   }
@@ -65,10 +69,17 @@ function onReady() {
   function checkQR ( qrSession ) {
     $.post( '/check/QR', { qrSession: qrSession }, function ( data, status ) {
       if ( status == 'success' && data) {
-      if ( data.status == 'waiting')
-        return setTimeout( checkQR, 500, qrSession )
-      if (data.error) console.log( data.error )
-      if (data.result) drawProfile( data.result )
+        if ( data.status == 'waiting')
+          return setTimeout( checkQR, 500, qrSession )
+        if (data.error) console.log( data.error )
+        if (data.result) {
+          window.location = '/'
+          // $('#qrcodeForm').hide()
+          // $('#logout').show()
+          // $('#login').hide()
+          // $('#loginBackdoor').hide()
+          // drawProfile( data.result )
+        }
       }
     })
   }
@@ -78,9 +89,10 @@ function onReady() {
       window.location = '/login/direct'
     } else {  // put up QR code
       $.get( '/login/QR', function ( data, status ) {
-        if (status == "success" && !data.error && data.result && data.result.qrURL ) {
+        if (status == "success" && !data.error && data.result && data.result.qrURL && data.result.qrSession ) {
           $('#qrcode').empty()
           $('#qrcodeForm').fadeIn('fast')
+          $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: 400, height: 400, text: data.result.qrURL } )
           setTimeout( checkQR, 500, data.result.qrSession )
         }
