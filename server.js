@@ -14,18 +14,25 @@ var express = require('express')
   , fs = require('fs')
   , os = require('os')
   , a2p3 = require('a2p3')
-
 // make sure you have a config.json and vault.json per a2p3 documentation
-a2p3.init( require('./config.json'), require('./vault.json'))
+  , config = require('./config.json')
+  , vault = require('./vault.json')
 
-var LISTEN_PORT = 8080
-var HOST_URL = null
+
+// REMOVE!!! here for testing
+
+var jwt = require('./node_modules/a2p3/lib/jwt')
+
+
+
+var LISTEN_PORT = 8080  // change if you want listen on a different port
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
-  HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
+  var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
   LISTEN_PORT = 8080
 }
 
+// returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
   if (HOST_URL) return HOST_URL
   // make URL from URL we are running on
@@ -114,7 +121,7 @@ function metaRedirectInfoPage ( redirectURL ) {
 }
 
 function fetchProfile( agentRequest, ixToken, callback ) {
-  var resource = new a2p3.Resource()
+  var resource = new a2p3.Resource( config, vault )
   resource.exchange( agentRequest, ixToken, function ( error, di ) {
     if ( error ) return callback ( error )
     var userDI = di // App's directed identifier for User
@@ -145,15 +152,23 @@ function loginQR( req, res )  {
 // we send a meta-refresh so that we show a info page in case there is no agent to
 // handle the a2p3.net: protcol scheme
 function loginDirect( req, res ) {
-  var agentRequest = a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
-  var redirectURL = 'a2p3.net://token?request=' + agentRequest
-  var html = metaRedirectInfoPage( redirectURL )
+  var params =
+    { returnURL: makeHostUrl( req ) + '/response'
+    , resources: RESOURCES
+    }
+    , agentRequest = a2p3.createAgentRequest( config, vault, params )
+    , redirectURL = 'a2p3.net://token?request=' + agentRequest
+    , html = metaRedirectInfoPage( redirectURL )
   res.send( html )
 }
 
 // loginBackdoor -- development login that uses a development version of setup.a2p3.net
 function loginBackdoor( req, res )  {
-  var agentRequest = a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
+  var params =
+    { returnURL: makeHostUrl( req ) + '/response'
+    , resources: RESOURCES
+    }
+    , agentRequest = a2p3.createAgentRequest( config, vault, params )
   var redirectURL = 'http://setup.a2p3.net/backdoor/login?request=' + agentRequest
   res.redirect( redirectURL )
 }
@@ -178,11 +193,18 @@ function qrCode( req, res ) {
     return res.redirect('/error')
   }
   checkRememberMe( qrSession, function ( e, remember ) {
-
-console.log('qrCode',remember)
-
     // ignore error since we can't do anything about it
-    var agentRequest = a2p3.createAgentRequest( makeHostUrl( req ) + '/response', RESOURCES )
+
+    var params =
+      { callbackURL: makeHostUrl( req ) + '/response'
+      , resources: RESOURCES
+      }
+    var agentRequest = a2p3.createAgentRequest( config, vault, params )
+
+console.log('Agent Request',agentRequest)
+var jws = jwt.Parse( agentRequest )
+console.log('payload',jws.payload)
+
     var json = req.query.json
     if ( json ) {
       var response = { result: { agentRequest: agentRequest, state: qrSession } }
