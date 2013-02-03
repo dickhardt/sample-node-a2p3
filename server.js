@@ -345,7 +345,6 @@ app.get('/logout', logout )
 // these endpoints serve static HTML pages
 app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html' ) } )
 app.get('/error', function( req, res ) { res.sendfile( __dirname + '/html/login_error.html' ) } )
-app.get('/complete', function( req, res ) { res.sendfile( __dirname + '/html/login_complete.html' ) } )
 app.get('/agent/install', function( req, res ) { res.sendfile( __dirname + '/html/agent_install.html' ) } )
 
 
