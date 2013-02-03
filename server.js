@@ -153,7 +153,7 @@ function loginQR( req, res )  {
 // handle the a2p3.net: protcol scheme
 function loginDirect( req, res ) {
   var params =
-    { returnURL: makeHostUrl( req ) + '/response'
+    { returnURL: makeHostUrl( req ) + '/response/redirect'
     , resources: RESOURCES
     }
     , agentRequest = a2p3.createAgentRequest( config, vault, params )
@@ -165,7 +165,7 @@ function loginDirect( req, res ) {
 // loginBackdoor -- development login that uses a development version of setup.a2p3.net
 function loginBackdoor( req, res )  {
   var params =
-    { returnURL: makeHostUrl( req ) + '/response'
+    { returnURL: makeHostUrl( req ) + '/response/redirect'
     , resources: RESOURCES
     }
     , agentRequest = a2p3.createAgentRequest( config, vault, params )
@@ -196,7 +196,7 @@ function qrCode( req, res ) {
     // ignore error since we can't do anything about it
 
     var params =
-      { callbackURL: makeHostUrl( req ) + '/response'
+      { callbackURL: makeHostUrl( req ) + '/response/callback'
       , resources: RESOURCES
       }
     var agentRequest = a2p3.createAgentRequest( config, vault, params )
