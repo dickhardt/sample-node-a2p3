@@ -336,11 +336,13 @@ app.get('/QR/:qrSession', qrCode )
 
 
 // these pages return a redirect
+app.get('/logout', logout )
 app.get('/login/backdoor', loginBackdoor)
 app.get('/login/direct', loginDirect)
+// called if App and Agent are on same device
 app.get('/response/redirect', loginResponseRedirect )
-app.get('/response/callback', loginResponseCallback )
-app.get('/logout', logout )
+// called if App and Agent are on different devices
+app.post('/response/callback', loginResponseCallback )
 
 // these endpoints serve static HTML pages
 app.get('/', function( req, res ) { res.sendfile( __dirname + '/html/index.html' ) } )

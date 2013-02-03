@@ -64,21 +64,20 @@ function onReady() {
       })
     })
   }
-
+  var cycles = 0
   // function that polls to see if we are logged in yet
   function checkQR ( qrSession ) {
     $.post( '/check/QR', { qrSession: qrSession }, function ( data, status ) {
       if ( status == 'success' && data) {
+        // reload if not scanned in 120 seconds
+        if (cycles++ > (2 * 120))
+          return window.location = '/'
+        // still waiting for QR to be scanned
         if ( data.status == 'waiting')
           return setTimeout( checkQR, 500, qrSession )
-        if (data.error) console.log( data.error )
+        // we are logged in, reload
         if (data.result) {
           window.location = '/'
-          // $('#qrcodeForm').hide()
-          // $('#logout').show()
-          // $('#login').hide()
-          // $('#loginBackdoor').hide()
-          // drawProfile( data.result )
         }
       }
     })
@@ -94,6 +93,7 @@ function onReady() {
           $('#qrcodeForm').fadeIn('fast')
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: 400, height: 400, text: data.result.qrURL } )
+          cycles = 0
           setTimeout( checkQR, 500, data.result.qrSession )
         }
       })
