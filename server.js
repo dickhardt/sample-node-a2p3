@@ -200,11 +200,6 @@ function qrCode( req, res ) {
       , resources: RESOURCES
       }
     var agentRequest = a2p3.createAgentRequest( config, vault, params )
-
-console.log('Agent Request',agentRequest)
-var jws = jwt.Parse( agentRequest )
-console.log('payload',jws.payload)
-
     var json = req.query.json
     if ( json ) {
       var response = { result: { agentRequest: agentRequest, state: qrSession } }
@@ -270,9 +265,6 @@ function checkQR( req, res ) {
     if (!response) {
       return res.send( { status: 'waiting'} )
     }
-
-// TBD: save notificationURL to cookie or something so we can remember user
-
     fetchProfile( response.agentRequest, response.ixToken, function ( error, results ) {
       var response = {}
       if ( error ) response.error = error
@@ -286,12 +278,14 @@ function checkQR( req, res ) {
 }
 
 function rememberMe( req, res ) {
+
+
+console.log('\nheaders\n',req.headers )
+console.log('\nsession\n',req.session )
+
   var remember = req.body.remember
   var qrSession = req.session.qrSession
   if (!remember || !qrSession) return res.send({ error: 'no remember or QR session'})
-
-console.log('\nrememberMe remember',remember,' qrSession:',qrSession)
-
   storeRememberMe( qrSession, remember, function ( e ) {
     if (e) return res.send( { error: e  } )
     return res.send( { result: { success: true } } )
