@@ -221,34 +221,45 @@ console.log('payload',jws.payload)
 }
 
 /*
-if we are getting a state parameter, we are getting the data
-directly from the Agent and not via a redirect to our app
+* We are getting called back through the redirect which means we are running on the
+* same device as the Agent is
 */
-
-function loginResponse( req, res )  {
+function loginResponseRedirect( req, res )  {
   var ixToken = req.query.token
   var agentRequest = req.query.request
-  var qrSession = req.query.state
-  var notificationURL = req.query.notificationURL
 
   if (!ixToken || !agentRequest) {
     return res.redirect( '/error' )
   }
-  if ( qrSession ) {
-    storeTokenRequest( qrSession, agentRequest, ixToken, notificationURL, function ( error ) {
-      if ( error ) return res.redirect( '/error' )
-      return res.redirect( '/complete' )
-    })
-  } else {
-    // NOTE: we should not get a notificationURL here as we came back direct, not a QR scan
-    fetchProfile( agentRequest, ixToken, function ( error, results ) {
-      if ( error ) return res.redirect( '/error' )
-      req.session.profile = results
-      return res.redirect('/')
-    })
-  }
+  fetchProfile( agentRequest, ixToken, function ( error, results ) {
+    if ( error ) return res.redirect( '/error' )
+    req.session.profile = results
+    return res.redirect('/')
+  })
 }
 
+
+/*
+* Agent is calling us back with the IX Token and Agent Request, but
+* Agent is running on a different device
+*/
+function loginResponseCallback( req, res )  {
+  var ixToken = req.body.token
+  var agentRequest = req.body.request
+  var qrSession = req.body.state
+  var notificationURL = req.body.notificationURL
+
+  if (!ixToken || !agentRequest || !qrSession) {
+    var code = 'MISSING_STATE'
+    if (!agentRequest) code = 'MISSING_REQUEST'
+    if (!ixToken) code = 'MISSING_TOKEN'
+    return res.send( { error: { code: code, message: 'token, request and state are required' } } )
+  }
+  storeTokenRequest( qrSession, agentRequest, ixToken, notificationURL, function ( error ) {
+    if ( error ) return res.send( { error: error } )
+    return res.send( { result: { success: true } } )
+  })
+}
 
 
 
@@ -327,7 +338,8 @@ app.get('/QR/:qrSession', qrCode )
 // these pages return a redirect
 app.get('/login/backdoor', loginBackdoor)
 app.get('/login/direct', loginDirect)
-app.get('/response', loginResponse )
+app.get('/response/redirect', loginResponseRedirect )
+app.get('/response/callback', loginResponseCallback )
 app.get('/logout', logout )
 
 // these endpoints serve static HTML pages
