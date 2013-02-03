@@ -278,11 +278,6 @@ function checkQR( req, res ) {
 }
 
 function rememberMe( req, res ) {
-
-
-console.log('\nheaders\n',req.headers )
-console.log('\nsession\n',req.session )
-
   var remember = req.body.remember
   var qrSession = req.session.qrSession
   if (!remember || !qrSession) return res.send({ error: 'no remember or QR session'})
