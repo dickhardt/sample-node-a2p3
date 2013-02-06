@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style type="text/css">
-  .loginStatus {text-align:right;}
-  .loginItem {padding-left: 5px;}
-  #qrcodeForm{border:1px solid #999; -webkit-box-shadow: 0px 0px 6px #CCC; background-color:#FFF; width:400px; height:470px; position: absolute; top:25px; left:10%; margin-left:-50px; padding:10px; border-radius:4px;}
-</style>
-
+	<meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1,user-scalable=yes">
+	<link rel="stylesheet" href="assets/style.css">
+	<title>Sample App</title>
 </head>
 <body>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-  <script type="text/javascript"    src="/jquery.qrcode.min.js"></script>
+  <script type="text/javascript" src="/jquery.qrcode.min.js"></script>
 
-<div class="loginStatus">
-  <a href="" id="login" class="loginItem"> login </a>
-  <a href="/login/backdoor" id="loginBackdoor" class="loginItem"> login backdoor </a>
-  <a href="/logout" id="logout" class="loginItem">logout </a>
-</div>
-
-<div id="qrcodeForm">
-    <p>Scan QR Code with your Agent to login</p>
-    <div id="qrcode"></div>
-    <input type="checkbox" name="rememberMe" id="rememberMe" class="selected">Remember me on this computer<br>
-</div>
-
-
-<H1 id='title'>Sample App</H1>
-
-<hr>
-
-<table id="profileTable"> </table>
-
+	<header class="header">
+		<section class="headerContainer">
+			<div class="mainTitle">Sample App</div>
+			<br>
+			<div class="mainTitleText">A reference client app for a2p3.net</div>
+		</section>			
+	</header>
+	<section class="mainContent">
+		<div class="mainContentWrap">
+			<div class="mainContentDoubleWrap">
+				<p class="mainContentSubTitle">
+					Now that you have arrived at your sample app, its time to login the A2P3 way.<bR><br>
+				</p>
+			</div>
+			<a class="genericButton" href="" id="login" class="loginItem">&nbsp;&nbsp;Login&nbsp;&nbsp;</a>
+			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>
+			<div id="qrcodeForm">
+		    	<p>Scan QR Code with your Agent to login</p>
+		    	<div id="qrcode"></div>
+		    	<input type="checkbox" name="rememberMe" id="rememberMe" class="selected">Remember me on this computer<br>
+			</div>
+			<br><Br>
+			<table id="profileTable" class="profileTable"> </table>
+		</div>
+		
+		<a class="backdoorLinks" href="/login/backdoor" id="loginBackdoor" class="loginItem"> or the login backdoor </a>
+		
+	</section>
+	
 <script type="text/javascript">
 
 function onReady() {
@@ -54,12 +61,12 @@ function onReady() {
   function drawProfile( profile ) {
     // console.log( profile )
     $.each( profile, function ( rs ) {
-      $('#profileTable').append('<tr><td>' + rs + '</td><td></td><td></td></tr>')
+      $('#profileTable').append('<tr><td colspan="3" class="categoryTitle">' + rs + '</td></tr>')
       $.each( profile[rs], function ( item, value ) {
         if (item !== 'photo') {
-          $('#profileTable').append('<tr><td></td><<td>' + item + '</td><td>' + value + '</td></tr>')
+          $('#profileTable').append('<tr><td></td><td class="genericLabel">' + item + ':</td><td>' + value + '</td></tr>')
         } else {
-          $('#profileTable').append('<tr><td></td><<td>' + item + '</td><td><img src="' + value + '"></td></tr>')
+          $('#profileTable').append('<tr><td></td><td class="genericLabel">' + item + ':</td><td><img class="fullPhotoImage" src="' + value + '"></td></tr>')
         }
       })
     })
