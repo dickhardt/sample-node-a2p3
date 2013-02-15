@@ -14,7 +14,7 @@
 			<div class="mainTitle">Sample App</div>
 			<br>
 			<div class="mainTitleText">A reference client app for a2p3.net</div>
-		</section>			
+		</section>
 	</header>
 	<section class="mainContent">
 		<div class="mainContentWrap">
@@ -33,11 +33,11 @@
 			<br><Br>
 			<table id="profileTable" class="profileTable"> </table>
 		</div>
-		
+
 		<a class="backdoorLinks" href="/login/backdoor" id="loginBackdoor" class="loginItem"> or the login backdoor </a>
-		
+
 	</section>
-	
+
 <script type="text/javascript">
 
 function onReady() {
@@ -81,7 +81,7 @@ function onReady() {
           return window.location = '/'
         // still waiting for QR to be scanned
         if ( data.status == 'waiting')
-          return setTimeout( checkQR, 500, qrSession )
+          return setTimeout( function() { checkQR( qrSession ) }, 500 )
         // we are logged in, reload
         if (data.result) {
           window.location = '/'
@@ -101,7 +101,7 @@ function onReady() {
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: 400, height: 400, text: data.result.qrURL } )
           cycles = 0
-          setTimeout( checkQR, 500, data.result.qrSession )
+          setTimeout( function () { checkQR( data.result.qrSession ), 500 )
         }
       })
     }
