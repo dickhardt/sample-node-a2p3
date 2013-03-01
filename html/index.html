@@ -46,7 +46,7 @@ function onReady() {
   var deviceAgent = navigator.userAgent.toLowerCase()
   var iOS = deviceAgent.match(/(iphone|ipod|ipad)/)
   var isAndroid = deviceAgent.indexOf("android") > -1
-  var agentDirect = iOS || isAndroid
+  var agentDirect = iOS // || isAndroid // only support iOS currently
 
   $('#qrcodeForm').hide()
   $('#logout').hide()
