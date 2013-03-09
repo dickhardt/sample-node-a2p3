@@ -363,11 +363,7 @@ app.use( express.cookieSession( cookieOptions ))
 //setup request routes
 
 // these end points are all AJAX calls from the web app and return a JSON response
-<<<<<<< HEAD
 app.post('/login/QR', loginQR )
-=======
-app.get('/login/QR', loginQR )
->>>>>>> 547f82c48a623d9568946645826ea35282497ee0
 app.post('/profile', profile )
 app.post('/check/QR', checkQR )
 app.post('/remember/me', rememberMe )
