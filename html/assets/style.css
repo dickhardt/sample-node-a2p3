@@ -116,7 +116,6 @@ button,input {
 /* Content Styling */
 body {
 	background: #fff;
-	-webkit-user-select: none;
 }
 
 body img[height="1"] {
@@ -148,7 +147,6 @@ body img[height="1"] {
 	height: 48px;
 	font-size: 14px;
 	font-weight: 400;
-	-webkit-user-select: text;
 }
 
 .footerContent {
