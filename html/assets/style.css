@@ -307,7 +307,8 @@ body img[height="1"] {
 }
 
 .mainTitleText {
-	font-family: 'QuicksandBook';
+	font-family: 'Century Gothic';
+	font-size: 15px;
 }
 
 .genericButton
