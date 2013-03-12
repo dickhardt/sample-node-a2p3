@@ -100,6 +100,7 @@ function onReady() {
           $('#qrcodeForm').fadeIn('fast')
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: 400, height: 400, text: data.result.qrURL } )
+          $('#qrcode').css({cursor: 'none'});
           cycles = 0
           setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
         }
