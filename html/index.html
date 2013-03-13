@@ -19,7 +19,7 @@
 	<section class="mainContent">
 		<div class="mainContentWrap">
 			<div class="mainContentDoubleWrap">
-				<p class="mainContentSubTitle">
+				<p class="mainContentSubTitle" id="subTitle">
 					Now that you have arrived at your sample app, its time to login the A2P3 way.<bR><br>
 				</p>
 			</div>
@@ -30,11 +30,18 @@
 		    	<div id="qrcode"></div>
 		    	<input type="checkbox" name="rememberMe" id="rememberMe" class="selected">Remember me on this computer<br>
 			</div>
+      <div id="notificationPopup">
+          <p>Sending a notification to your Personal Agent on your mobile device</p>
+      </div>
+
 			<br><Br>
 			<table id="profileTable" class="profileTable"> </table>
 		</div>
 
 		<a class="backdoorLinks" href="/login/backdoor" id="loginBackdoor" class="loginItem"> or the login backdoor </a>
+
+
+    <a class="backdoorLinks" href="" id="loginNotification" class="loginItem"> ### email address ### </a>
 
 	</section>
 
@@ -50,6 +57,8 @@ function onReady() {
 
   $('#qrcodeForm').hide()
   $('#logout').hide()
+  $('#notificationPopup').hide()
+  $('#loginNotification').hide()
 
   $('#rememberMe').change( function () {
     var remember = $('#rememberMe').attr('checked')?true:false
@@ -60,6 +69,7 @@ function onReady() {
 
   function drawProfile( profile ) {
     // console.log( profile )
+    $('#subTitle').hide()
     $.each( profile, function ( rs ) {
       $('#profileTable').append('<tr><td colspan="3" class="categoryTitle">' + rs + '</td></tr>')
       $.each( profile[rs], function ( item, value ) {
@@ -94,7 +104,7 @@ function onReady() {
     if (agentDirect) {
       window.location = '/login/direct'
     } else {  // put up QR code
-      $.get( '/login/QR', function ( data, status ) {
+      $.post( '/login/QR', function ( data, status ) {
         if (status == "success" && !data.error && data.result && data.result.qrURL && data.result.qrSession ) {
           $('#qrcode').empty()
           $('#qrcodeForm').fadeIn('fast')
@@ -109,14 +119,37 @@ function onReady() {
     return false
   })
 
+  $('#loginNotification').click( function () {
+    $.post( '/notification/invoke', function ( data, status ) {
+      if (status == "success" && !data.error && data.result && data.result.qrSession ) {
+        $('#loginNotification').hide()
+        $('#notificationPopup').fadeIn('fast')
+        cycles = 0
+        setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
+      }
+    })
+    return false
+  })
+
+
+
+
   // see if we have a profile to show on a reload
   $.post( '/profile', function ( data, status ) {
     // console.log( '/profile ->', data )
-    if (status == "success" && !data.error && data.result ) {   // TBD, deal with error
+    if (status == 'success' && !data.error && data.result ) {   // TBD, deal with error
       $('#logout').show()
       $('#login').hide()
       $('#loginBackdoor').hide()
-      drawProfile( data.result )
+      return drawProfile( data.result )
+    }
+    if (status == 'success') {  // not logged in
+      $.post( '/notification/check', function ( data, status ) {
+        if (status == 'success' && !data.error && data.result && data.result.name ) {
+          $('#loginNotification').text( 'login as '+data.result.name )
+          $('#loginNotification').show()
+        }
+      })
     }
   })
 
