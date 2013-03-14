@@ -29,7 +29,8 @@
 
 .loginStatus {text-align:right;}
   .loginItem {padding-left: 5px;}
-  #qrcodeForm{border:1px solid #999; -webkit-box-shadow: 0px 0px 6px #CCC; background-color:#FFF; width:400px; height:470px; position: absolute; top:25px; left:10%; margin-left:-50px; padding:10px; border-radius:4px;z-index: 1;}
+  #qrcodeForm{border:1px solid #999; -webkit-box-shadow: 0px 0px 6px #CCC; background-color:#FFF; width:400px; height:470px; position: absolute; top:25px; left:10%; margin-left:-50px; padding:10px; border-radius:4px;z-index: 2;}
+  #notificationPopup{border:1px solid #999; -webkit-box-shadow: 0px 0px 6px #CCC; background-color:#FFF; width:300px; height:75px; position: absolute; top:20%px; left:20%; margin-left:-50px; padding:10px; border-radius:4px;z-index: 1;}
 
 footer,header,section {
 	display: block;
@@ -116,7 +117,6 @@ button,input {
 /* Content Styling */
 body {
 	background: #fff;
-	-webkit-user-select: none;
 }
 
 body img[height="1"] {
@@ -148,7 +148,6 @@ body img[height="1"] {
 	height: 48px;
 	font-size: 14px;
 	font-weight: 400;
-	-webkit-user-select: text;
 }
 
 .footerContent {
@@ -309,7 +308,8 @@ body img[height="1"] {
 }
 
 .mainTitleText {
-	font-family: 'QuicksandBook';
+	font-family: 'Century Gothic';
+	font-size: 15px;
 }
 
 .genericButton

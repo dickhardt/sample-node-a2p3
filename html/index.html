@@ -24,24 +24,23 @@
 				</p>
 			</div>
 			<a class="genericButton" href="" id="login" class="loginItem">&nbsp;&nbsp;Login&nbsp;&nbsp;</a>
-			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>
+			
+			<a class="genericButton loginItem" href="" id="loginNotification"> ### email address ### </a>
 			<div id="qrcodeForm">
 		    	<p>Scan QR Code with your Agent to login</p>
 		    	<div id="qrcode"></div>
 		    	<input type="checkbox" name="rememberMe" id="rememberMe" class="selected">Remember me on this computer<br>
 			</div>
-      <div id="notificationPopup">
-          <p>Sending a notification to your Personal Agent on your mobile device</p>
-      </div>
-
+			<div id="notificationPopup" style="z-index: 1;">
+  				<p><b>Sending a notification to your Personal Agent on your mobile device</b></p>
+  			</div>
 			<br><Br>
 			<table id="profileTable" class="profileTable"> </table>
+			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>
+			<!--
+				<a class="backdoorLinks" href="/login/backdoor" id="loginBackdoor" class="loginItem"> or the login backdoor </a>
+			-->
 		</div>
-
-		<a class="backdoorLinks" href="/login/backdoor" id="loginBackdoor" class="loginItem"> or the login backdoor </a>
-
-
-    <a class="backdoorLinks" href="" id="loginNotification" class="loginItem"> ### email address ### </a>
 
 	</section>
 
@@ -110,6 +109,7 @@ function onReady() {
           $('#qrcodeForm').fadeIn('fast')
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: 400, height: 400, text: data.result.qrURL } )
+          $('#qrcode').css({cursor: 'none'});
           cycles = 0
           setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
         }
@@ -145,7 +145,7 @@ function onReady() {
     if (status == 'success') {  // not logged in
       $.post( '/notification/check', function ( data, status ) {
         if (status == 'success' && !data.error && data.result && data.result.name ) {
-          $('#loginNotification').text( 'login as '+data.result.name )
+          $('#loginNotification').text( 'Login as '+data.result.name )
           $('#loginNotification').show()
         }
       })
