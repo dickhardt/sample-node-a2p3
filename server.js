@@ -40,6 +40,10 @@ var HOST_URL = 'http://a2p3-sample.azurewebsites.net'
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
+
+
+console.log('\nreq\n', require('util').inspect( req, {depth: 1} ) )
+
   if (HOST_URL) return HOST_URL
   // make URL from URL we are running on
   var hostURL = req.protocol + '://' + req.host
