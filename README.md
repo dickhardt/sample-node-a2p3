@@ -10,7 +10,8 @@ Sample application for A2P3
 - Facebook account
 
 ####Optional
-- [DotCloud](http://dotcloud.com) account
+- [DotCloud](http://dotcloud.com) account; or
+- [Windows Azure](http://www.windowsazure.com) account
 
 ##Install and Setup
 1) `git clone git://github.com/dickhardt/sample-node-a2p3.git`
@@ -42,22 +43,20 @@ See [node-a2p3](https://github.com/dickhardt/node-a2p3) for details
 
 ##Windows Azure Deployment
 
-1) Register at [Windows Azure](http://www.windowsazure.com/en-us/) for a free 90 day trial account.
+1) Register at [Windows Azure](http://www.windowsazure.com) and [build and deploy a Node.js web site](http://www.windowsazure.com/en-us/develop/nodejs/tutorials/create-a-website-(mac)) if you have not done it before.
 
-2) Goto the [portal](https://manage.windowsazure.com) and create a new Web Site, selecting Quick Create. 
+2) Create a new website and set up deployment to use a **local git** repository. Remember your **username**, **password** and copy the resulting **git repo** that is hosted at Azure.
 
-3) Click on the new website to get to its dashboard and set deployment credentials to be a local git repository. Remember the username and password that you set and copy the resulting git repo URL.
+3) `git remote add azure <git repo at azure>` will add a git remote to your local copy of the Sample App
 
-4) `git remote add azure <git repo at azure>` will add a git remote to your local copy of the Sample App
-
-5) Add the generated vault.json and config.json files to the repo so that they will be deployed to Azure.
+4) Add the generated vault.json and config.json files to the repo so that they will be deployed to Azure.
 
 	git add -f vault.json 
 	git add -f config.json
 
-6) `git commit -m "adding in vault.json and config.js"` to commit
+5) `git commit -m "adding in vault.json and config.js"` to commit new files to local repo
 
-6) `git push azure master` will push the code to Azure. You will need to enter your credentials you created in (3)
+6) `git push azure master` will push the code to Azure. You will need to enter your credentials you created in (2)
 
 
 

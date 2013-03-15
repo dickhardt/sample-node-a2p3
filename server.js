@@ -40,7 +40,7 @@ function makeHostUrl (req) {
 
   if (HOST_URL) return HOST_URL
   HOST_URL = req.headers.origin // HACK, but reliable across platforms for what we want
-  return HOST_URL
+  return HOST_URL               // as first call inherently needs to be a login
 }
 
 var RESOURCES =
