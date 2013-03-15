@@ -36,6 +36,7 @@ if (process.env.DOTCLOUD_WWW_HTTP_URL) {
 // HACK UNTIL WE FIGURE OUT HOW TO DETECT WE ARE ON AZURE
 
 LISTEN_PORT = process.env.PORT
+var HOST_URL = 'http://a2p3-sample.azurewebsites.net'
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
