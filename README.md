@@ -57,7 +57,7 @@ See [node-a2p3](https://github.com/dickhardt/node-a2p3) for details
 
 6) `git commit -m "adding in vault.json and config.js"` to commit
 
-6) `git push azure master` will push the code to Azure
+6) `git push azure master` will push the code to Azure. You will need to enter your credentials you created in (3)
 
 
 

@@ -27,10 +27,15 @@ var jwt = require('./node_modules/a2p3/lib/jwt')
 
 var LISTEN_PORT = 8080  // change if you want listen on a different port
 
-if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
+if (process.env.DOTCLOUD_WWW_HTTP_URL) {
+  // looks like we are running on DotCloud, adjust our world
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
   LISTEN_PORT = 8080
 }
+
+// HACK UNTIL WE FIGURE OUT HOW TO DETECT WE ARE ON AZURE
+
+LISTEN_PORT = process.env.PORT
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
@@ -398,3 +403,5 @@ app.get('/test', function( req, res ) { res.sendfile( __dirname + '/html/test.ht
 app.listen( LISTEN_PORT )
 
 console.log('\nSample App available on this machine on port:', LISTEN_PORT )
+
+console.log('\nprocess.env dump\n',process.env)
