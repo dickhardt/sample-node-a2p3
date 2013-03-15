@@ -20,6 +20,7 @@ var express = require('express')
 
 
 var LISTEN_PORT = 8080  // change if you want listen on a different port
+var HOST_URL = null
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {
   // looks like we are running on DotCloud, adjust our world
@@ -38,7 +39,8 @@ function makeHostUrl (req) {
 // console.log('\nreq.headers\n', req.headers )
 
   if (HOST_URL) return HOST_URL
-  return req.headers.origin // HACK, but reliable across platforms for what we want
+  HOST_URL = req.headers.origin // HACK, but reliable across platforms for what we want
+  return HOST_URL
 }
 
 var RESOURCES =
