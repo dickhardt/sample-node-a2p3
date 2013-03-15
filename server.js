@@ -32,8 +32,11 @@ if (process.env.DOTCLOUD_WWW_HTTP_URL) {
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
   LISTEN_PORT = 8080
 }
+
+
+
 var temp = String(process.env.PORT)
-if ( temp.startsWith('pipe') ) {
+if ( temp.contains('pipe') ) {
   // HACK to detect we are running on Azure
   LISTEN_PORT = process.env.PORT
   var AZURE = true
