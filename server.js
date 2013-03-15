@@ -19,45 +19,26 @@ var express = require('express')
   , vault = require('./vault.json')
 
 
-// REMOVE!!! here for testing
-
-var jwt = require('./node_modules/a2p3/lib/jwt')
-
-
-
 var LISTEN_PORT = 8080  // change if you want listen on a different port
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {
   // looks like we are running on DotCloud, adjust our world
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
   LISTEN_PORT = 8080
-}
-
-
-
-// var temp = String(process.env.PORT) + " "
-// if ( temp.contains('pipe') ) {
-  // HACK to detect we are running on Azure
+} else if (process.env.PORT) {
+  // HACK! looks like we might be running on Azure
   LISTEN_PORT = process.env.PORT
-  var AZURE = true
+  //  var AZURE = true
+}
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
 
-
-console.log('\nreq\n', require('util').inspect( req, false, 1) )
-console.log('\nreq.headers\n', req.headers )
+// console.log('\nreq\n', require('util').inspect( req, false, 1) )
+// console.log('\nreq.headers\n', req.headers )
 
   if (HOST_URL) return HOST_URL
-  if (AZURE) {
-    return 'https://a2p3-sample.azurewebsites.net/'
-    // Azure creates
-  } else {
-    // make URL from URL we are running on
-    var hostURL = req.protocol + '://' + req.host
-    if (LISTEN_PORT) hostURL += ':' + LISTEN_PORT
-    return hostURL
-  }
+  return req.headers.origin // HACK, but reliable across platforms for what we want
 }
 
 var RESOURCES =
@@ -418,4 +399,4 @@ app.listen( LISTEN_PORT )
 
 console.log('\nSample App available on this machine on port:', LISTEN_PORT )
 
-console.log('\nprocess.env dump\n',process.env)
+// console.log('\nprocess.env dump\n',process.env)
