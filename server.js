@@ -33,22 +33,29 @@ if (process.env.DOTCLOUD_WWW_HTTP_URL) {
   LISTEN_PORT = 8080
 }
 
-// HACK UNTIL WE FIGURE OUT HOW TO DETECT WE ARE ON AZURE
-
-LISTEN_PORT = process.env.PORT
-var HOST_URL = 'http://a2p3-sample.azurewebsites.net'
+if ( process.env.PORT.startsWith('pipe') ) {
+  // HACK to detect we are running on Azure
+  LISTEN_PORT = process.env.PORT
+  var AZURE = true
+}
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
 
 
-console.log('\nreq\n', require('util').inspect( req, {depth: 1} ) )
+console.log('\nreq\n', require('util').inspect( req, false, 1) )
+console.log('\nreq.headers\n', req.headers )
 
   if (HOST_URL) return HOST_URL
-  // make URL from URL we are running on
-  var hostURL = req.protocol + '://' + req.host
-  if (LISTEN_PORT) hostURL += ':' + LISTEN_PORT
-  return hostURL
+  if (AZURE) {
+    return 'https://a2p3-sample.azurewebsites.net/'
+    // Azure creates
+  } else {
+    // make URL from URL we are running on
+    var hostURL = req.protocol + '://' + req.host
+    if (LISTEN_PORT) hostURL += ':' + LISTEN_PORT
+    return hostURL
+  }
 }
 
 var RESOURCES =
