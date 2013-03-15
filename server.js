@@ -35,12 +35,11 @@ if (process.env.DOTCLOUD_WWW_HTTP_URL) {
 
 
 
-var temp = String(process.env.PORT) + " "
-if ( temp.contains('pipe') ) {
+// var temp = String(process.env.PORT) + " "
+// if ( temp.contains('pipe') ) {
   // HACK to detect we are running on Azure
   LISTEN_PORT = process.env.PORT
   var AZURE = true
-}
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
