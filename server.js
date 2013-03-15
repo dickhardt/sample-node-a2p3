@@ -35,7 +35,7 @@ if (process.env.DOTCLOUD_WWW_HTTP_URL) {
 
 
 
-var temp = String(process.env.PORT)
+var temp = String(process.env.PORT) + " "
 if ( temp.contains('pipe') ) {
   // HACK to detect we are running on Azure
   LISTEN_PORT = process.env.PORT
