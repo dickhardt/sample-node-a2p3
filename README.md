@@ -20,15 +20,15 @@ Sample application for A2P3
 
 3) `npm install`
 
-**need to have another step to create the config file**
+4) `npm run config`
 
-4) Register if need be at [setup.a2p3.net](http://setup.a2p3.net) and create a CLI Agent and save the device parameter
+5) Register if need be at [setup.a2p3.net](http://setup.a2p3.net) and create a CLI Agent and save the device parameter
 
-5) Edit config.json and insert the `device` parameter
+6) Edit config.json and insert the `device` parameter
 
-6) `npm run-script register` to create the vault.json file
+7) `npm run register` to create the vault.json file (if you change the App ID, you need to rerun this command)
 
-7) `npm start` will start the server locally
+8) `npm start` will start the server locally
 
 ##DotCloud Deployment
 
