@@ -2,5 +2,3 @@
 .dotcloud
 *.log
 node_modules
-vault.json
-config.json
