@@ -24,7 +24,7 @@
 				</p>
 			</div>
 			<a class="genericButton" href="" id="login" class="loginItem">&nbsp;&nbsp;Login&nbsp;&nbsp;</a>
-			
+
 			<a class="genericButton loginItem" href="" id="loginNotification"> ### email address ### </a>
 			<div id="qrcodeForm">
 		    	<p>Scan QR Code with your Agent to login</p>
@@ -45,6 +45,33 @@
 	</section>
 
 <script type="text/javascript">
+/*
+ * Common utility to canculate width and height of the qr code.
+ * Depends on jquery.  Returns a minimum of 120 if browser is too small and
+ * a maximum of 400 as to not make the person lean back in their chair.
+ */
+function getQRCodeSize () {
+  var height = $(document).height();
+  var width = $(document).width();
+
+  var max = Math.min(height, width, 400 + 120);
+
+  return Math.max(max - 120, 120);
+}
+
+/*
+ * A common utility to determine how to render the QR code.  Preferred canvas because
+ * of quirks in Chrome table rendering.  Tables are used for unsupported canvas HTML5
+ * tag.
+ */
+function getQRCodeRenderType () {
+  var canvasSupported = !!window.HTMLCanvasElement;
+  if (canvasSupported) {
+    return "canvas"
+  } else {
+    return "table";
+  }
+}
 
 function onReady() {
 
@@ -108,7 +135,12 @@ function onReady() {
           $('#qrcode').empty()
           $('#qrcodeForm').fadeIn('fast')
           $('#rememberMe').attr('checked', false)
-          $('#qrcode').qrcode( {width: 400, height: 400, text: data.result.qrURL, render: 'table' } )
+          $('#qrcode').qrcode(
+            { width: getQRCodeSize()
+            , height: getQRCodeSize()
+            , text: data.result.qrURL
+            , render: getQRCodeRenderType()
+            } )
           $('#qrcode').css({cursor: 'none'});
           cycles = 0
           setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
