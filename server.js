@@ -25,7 +25,8 @@ var jwt = require('./node_modules/a2p3/lib/jwt')
 
 
 
-var LISTEN_PORT = 8080  // change if you want listen on a different port
+var LISTEN_PORT = 9090  // change if you want listen on a different port
+var HOST_URL = "http://192.168.252.1:9090"
 
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
