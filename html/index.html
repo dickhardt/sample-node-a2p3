@@ -59,6 +59,20 @@ function getQRCodeSize () {
 	return Math.max(max - 120, 120);
 }
 
+/* 
+ * A common utility to determine how to render the QR code.  Preferred canvas because
+ * of quirks in Chrome table rendering.  Tables are used for unsupported canvas HTML5 
+ * tag.
+ */
+function getQRCodeRenderType () {
+	var canvasSupported = !!window.HTMLCanvasElement;
+	if (canvasSupported) {
+		return "canvas" 
+	} else {
+		return "table";
+	}
+}
+
 function onReady() {
 
   // check if are running on iOS or android, only agent platforms currently supported
@@ -121,7 +135,7 @@ function onReady() {
           $('#qrcode').empty()
           $('#qrcodeForm').fadeIn('fast')
           $('#rememberMe').attr('checked', false)
-          $('#qrcode').qrcode( {width: getQRCodeSize(), height: getQRCodeSize(), text: data.result.qrURL} )
+          $('#qrcode').qrcode( {width: getQRCodeSize(), height: getQRCodeSize(), text: data.result.qrURL, render: getQRCodeRenderType()} )
           $('#qrcode').css({cursor: 'none'});
           cycles = 0
           setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
