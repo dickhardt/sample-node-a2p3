@@ -28,9 +28,7 @@
 			<a class="genericButton" href="" id="login" class="loginItem">&nbsp;&nbsp;Login&nbsp;&nbsp;</a>
 			
 			<a class="genericButton loginItem" href="" id="loginNotification"> ### email address ### </a>
-			<div id="notificationPopup" style="z-index: 1;">
-  				<p><b>Sending a notification to your Personal Agent on your mobile device</b></p>
-  			</div>
+			
 			<br><Br>
 			<table id="profileTable" class="profileTable"> </table>
 			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>
@@ -40,6 +38,9 @@
 		</div>
 
 	</section>
+	<div id="notificationPopup" title="Notice">
+		<div>Sending a notification to your Personal Agent on your mobile device...</div>
+	</div>
 	<div title="Scan the QR Code with your Personal Agent" id="qrcodeForm">
 		<div style="text-align: center;" id="qrcode"></div>
 		<br>
@@ -137,7 +138,7 @@ function onReady() {
           $('#qrcode').empty()
           $('#qrcodeForm').dialog({
 			  width : getQRCodeSize() + 35,
-			  height : getQRCodeSize() + 110
+			  height : getQRCodeSize() + 113
 			});
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: getQRCodeSize(), height: getQRCodeSize(), text: data.result.qrURL, render: getQRCodeRenderType()} )
@@ -153,8 +154,10 @@ function onReady() {
   $('#loginNotification').click( function () {
     $.post( '/notification/invoke', function ( data, status ) {
       if (status == "success" && !data.error && data.result && data.result.qrSession ) {
-        $('#loginNotification').hide()
-        $('#notificationPopup').fadeIn('fast')
+        $('#notificationPopup').dialog({
+			  width : 241,
+			  height : 150
+			});
         cycles = 0
         setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
       }
