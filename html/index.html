@@ -42,6 +42,7 @@
 	</section>
 	<div title="Scan the QR Code with your Personal Agent" id="qrcodeForm">
 		<div style="text-align: center;" id="qrcode"></div>
+		<br>
 		<input type="checkbox" name="rememberMe" id="rememberMe" class="selected">Remember me on this computer<br>
 	</div>
 
@@ -136,7 +137,7 @@ function onReady() {
           $('#qrcode').empty()
           $('#qrcodeForm').dialog({
 			  width : getQRCodeSize() + 35,
-			  height : getQRCodeSize() + 85
+			  height : getQRCodeSize() + 110
 			});
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: getQRCodeSize(), height: getQRCodeSize(), text: data.result.qrURL, render: getQRCodeRenderType()} )
