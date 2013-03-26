@@ -19,27 +19,28 @@ var express = require('express')
   , vault = require('./vault.json')
 
 
-// REMOVE!!! here for testing
+var LISTEN_PORT = 8080  // change if you want listen on a different port
+var HOST_URL = null
 
-var jwt = require('./node_modules/a2p3/lib/jwt')
-
-
-
-var LISTEN_PORT = 9090  // change if you want listen on a different port
-var HOST_URL = "http://192.168.252.1:9090"
-
-if (process.env.DOTCLOUD_WWW_HTTP_URL) {  // looks like we are running on DotCloud, adjust our world
+if (process.env.DOTCLOUD_WWW_HTTP_URL) {
+  // looks like we are running on DotCloud, adjust our world
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
   LISTEN_PORT = 8080
+} else if (process.env.PORT) {
+  // HACK! looks like we might be running on Azure
+  LISTEN_PORT = process.env.PORT
+  //  var AZURE = true
 }
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
+
+// console.log('\nreq\n', require('util').inspect( req, false, 1) )
+// console.log('\nreq.headers\n', req.headers )
+
   if (HOST_URL) return HOST_URL
-  // make URL from URL we are running on
-  var hostURL = req.protocol + '://' + req.host
-  if (LISTEN_PORT) hostURL += ':' + LISTEN_PORT
-  return hostURL
+  HOST_URL = req.headers.origin // HACK, but reliable across platforms for what we want
+  return HOST_URL               // as first call inherently needs to be a login
 }
 
 var RESOURCES =
@@ -399,3 +400,5 @@ app.get('/test', function( req, res ) { res.sendfile( __dirname + '/html/test.ht
 app.listen( LISTEN_PORT )
 
 console.log('\nSample App available on this machine on port:', LISTEN_PORT )
+
+// console.log('\nprocess.env dump\n',process.env)
