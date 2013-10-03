@@ -289,16 +289,6 @@ function checkQR ( req, res ) {
   })
 }
 
-function rememberMe ( req, res ) {
-  var remember = req.body.remember
-  var qrSession = req.session.qrSession
-  if (!remember || !qrSession) return res.send({ error: 'no remember or QR session'})
-  storeRememberMe( qrSession, remember, function ( e ) {
-    if (e) return res.send( { error: e  } )
-    return res.send( { result: { success: true } } )
-  })
-}
-
 
 function profile ( req, res )  {
   if ( req.session.profile ) {
@@ -308,43 +298,6 @@ function profile ( req, res )  {
   }
 }
 
-// checks if a NotificationURL has been set
-function notificationCheck ( req, res ) {
-  var notification = req.signedCookies.notificationURL
-  var response = { result: { name: null } }
-  if ( notification && notification.name )
-    response.result.name = notification.name
-  return res.send( response )
-}
-
-// invokes Notification URL
-function notificationInvoke ( req, res, next ) {
-  var notification = req.signedCookies.notificationURL
-  if ( !notification || !notification.url ) return next( new Error('No notification URL was set') )
-
-  // we simulate creating a QR code short URl and send that to the
-  // notification URL to invoke, handling from there on is the same
-  // as if we have put up a QR code
-  var qrSession = a2p3.random16bytes()
-  req.session.qrSession = qrSession
-  var options =
-    { url: notification.url
-    , method: 'POST'
-    , json:
-      { url: makeHostUrl( req ) + '/QR/' + qrSession
-      , alert: 'Sample App (' + req.host + ') login request'
-      }
-    }
-  // call Notification URL which will send the QR Code Short URL to the Personal Agent
-  request.post( options, function ( e, r, body ) {
-    if (e) return res.send( { result: { error: e  } } )
-    if (r.statusCode && r.statusCode != 200) return res.send( { result: { error:  r.statusCode } } )
-    if (body && body.result && body.result.error) return res.send( { result: { error: body.result.error  } } )
-    if (body && body.result && body.result.success)
-      return res.send( { result: { qrSession: qrSession } } )
-    return res.send( { result: { error: 'UNKNOWN'  } } )
-  })
-}
 
 // check we have valid keys
 // TBD -- check that our keys are valid with the Registrar
@@ -368,9 +321,6 @@ app.use( express.cookieSession( cookieOptions ))
 app.post('/login/QR', loginQR )
 app.post('/profile', profile )
 app.post('/check/QR', checkQR )
-app.post('/remember/me', rememberMe )
-app.post('/notification/check', notificationCheck )
-app.post('/notification/invoke', notificationInvoke )
 
 // this page is called by either the Agent or a QR Code reader
 // returns either the Agent Request in JSON if called by Agent

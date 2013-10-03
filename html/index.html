@@ -8,7 +8,7 @@
 </head>
 <body>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-  <script type="text/javascript" src="//code.jquery.com/ui/1.10.0/jquery-ui.min.js"></script> 
+  <script type="text/javascript" src="//code.jquery.com/ui/1.10.0/jquery-ui.min.js"></script>
   <script type="text/javascript" src="/jquery.qrcode.min.js"></script>
 
 	<header class="header">
@@ -26,9 +26,7 @@
 				</p>
 			</div>
 			<a class="genericButton" href="" id="login" class="loginItem">&nbsp;&nbsp;Login&nbsp;&nbsp;</a>
-			
-			<a class="genericButton loginItem" href="" id="loginNotification"> ### email address ### </a>
-			
+
 			<br><Br>
 			<table id="profileTable" class="profileTable"> </table>
 			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>
@@ -38,13 +36,9 @@
 		</div>
 
 	</section>
-	<div id="notificationPopup" title="Notice">
-		<div>Sending a notification to your Personal Agent on your mobile device...</div>
-	</div>
 	<div title="Scan the QR Code with your Personal Agent" id="qrcodeForm">
 		<div style="text-align: center;" id="qrcode"></div>
 		<br>
-		<input type="checkbox" name="rememberMe" id="rememberMe" class="selected">Remember me on this computer<br>
 	</div>
 
 <script type="text/javascript">
@@ -54,23 +48,23 @@
  * a maximum of 400 as to not make the person lean back in their chair.
  */
 function getQRCodeSize () {
-	var height = $(document).height(); 
+	var height = $(document).height();
 	var width = $(document).width();
 
 	var max = Math.min(height, width, 400 + 120);
-	
+
 	return Math.max(max - 120, 120);
 }
 
-/* 
+/*
  * A common utility to determine how to render the QR code.  Preferred canvas because
- * of quirks in Chrome table rendering.  Tables are used for unsupported canvas HTML5 
+ * of quirks in Chrome table rendering.  Tables are used for unsupported canvas HTML5
  * tag.
  */
 function getQRCodeRenderType () {
 	var canvasSupported = !!window.HTMLCanvasElement;
 	if (canvasSupported) {
-		return "canvas" 
+		return "canvas"
 	} else {
 		return "table";
 	}
@@ -89,11 +83,6 @@ function onReady() {
   $('#notificationPopup').hide()
   $('#loginNotification').hide()
 
-  $('#rememberMe').change( function () {
-    var remember = $('#rememberMe').attr('checked')?true:false
-    $.post('/remember/me', {remember: remember}, function ( data, status ) {
-      // not much to do!
-    })
   })
 
   function drawProfile( profile ) {
@@ -151,22 +140,6 @@ function onReady() {
     return false
   })
 
-  $('#loginNotification').click( function () {
-    $.post( '/notification/invoke', function ( data, status ) {
-      if (status == "success" && !data.error && data.result && data.result.qrSession ) {
-        $('#notificationPopup').dialog({
-			  width : 241,
-			  height : 150
-			});
-        cycles = 0
-        setTimeout( function () { checkQR( data.result.qrSession ) }, 500 )
-      }
-    })
-    return false
-  })
-
-
-
 
   // see if we have a profile to show on a reload
   $.post( '/profile', function ( data, status ) {
@@ -176,14 +149,6 @@ function onReady() {
       $('#login').hide()
       $('#loginBackdoor').hide()
       return drawProfile( data.result )
-    }
-    if (status == 'success') {  // not logged in
-      $.post( '/notification/check', function ( data, status ) {
-        if (status == 'success' && !data.error && data.result && data.result.name ) {
-          $('#loginNotification').text( 'Login as '+data.result.name )
-          $('#loginNotification').show()
-        }
-      })
     }
   })
 
