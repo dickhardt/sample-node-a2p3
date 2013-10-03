@@ -10,8 +10,7 @@ Sample application for A2P3
 - Facebook account
 
 ####Optional
-- [DotCloud](http://dotcloud.com) account; or
-- [Windows Azure](http://www.windowsazure.com) account
+- [AWS](http://aws.amazon.com) account
 
 ##Install and Setup
 1) `git clone git://github.com/dickhardt/sample-node-a2p3.git`
@@ -30,39 +29,26 @@ Sample application for A2P3
 
 8) `npm start` will start the server locally
 
-##DotCloud Deployment
+## Deployment to AWS Elastic Beanstalk
 
-1) Register at [DotCloud](http://dotcloud.com) for a free account and install the dotcloud CLI
+1) Add the generated vault.json and config.json files to the local repo so that they will be deployed to AWS:
 
-2) `dotcloud create sample` answer yes to link
+  git add -f vault.json
+  git add -f config.json
 
-3) `dotcloud push` will deploy to dotcloud and show you the URL it is running at
+2) Browse to [AWS](http://aws.amazon.com) and register or login.
 
-####config.json and vault.json
-See [node-a2p3](https://github.com/dickhardt/node-a2p3) for details
+3) Get your Access Key ID and Secret Access Key from [Security Credentials](https://portal.aws.amazon.com/gp/aws/securityCredentials)
 
-##Windows Azure Deployment
+4) Install and setup the [eb](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/usingCLI.html) CLI tools.
 
-1) Register at [Windows Azure](http://www.windowsazure.com) and [build and deploy a Node.js web site](http://www.windowsazure.com/en-us/develop/nodejs/tutorials/create-a-website-(mac)) if you have not done it before.
+5) `eb init` providing yoru Access Key ID and Secret Access Key and accept all defaults
 
-2) Create a new website and set up deployment to use a **local git** repository. Remember your **username**, **password** and copy the resulting **git repo** that is hosted at Azure.
+6) `eb start` will deply and start your application
 
-3) `git remote add azure <git repo at azure>` will add a git remote to your local copy of the Sample App
+When you make changes, `git aws.push` will upload your local commits
 
-4) Add the generated vault.json and config.json files to the repo so that they will be deployed to Azure.
-
-	git add -f vault.json 
-	git add -f config.json
-
-5) `git commit -m "adding in vault.json and config.js"` to commit new files to local repo
-
-6) `git push azure master` will push the code to Azure. You will need to enter your credentials you created in (2)
-
-
-
-##How it Works
-
-TBD
+Additional documetion on running [Node on Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_nodejs.html)
 
 ##Related
 
