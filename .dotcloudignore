@@ -1,6 +1,0 @@
-.DS_Store
-.dotcloud
-*.log
-node_modules
-*.sublime-*
-.git*
