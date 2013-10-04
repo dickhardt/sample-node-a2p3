@@ -25,11 +25,11 @@ var HOST_URL = null
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {
   // looks like we are running on DotCloud, adjust our world
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
-  LISTEN_PORT = 8080
-} else if (process.env.PORT) {
-  // HACK! looks like we might be running on Azure
-  LISTEN_PORT = process.env.PORT
-  //  var AZURE = true
+  LISTEN_PORT = 8181
+} else
+
+if (process.env.PORT) {
+  LISTEN_PORT = process.env.PORT // most host environments set the PORT environment var to be where we listen
 }
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
@@ -40,6 +40,9 @@ function makeHostUrl (req) {
 
   if (HOST_URL) return HOST_URL
   HOST_URL = req.headers.origin // HACK, but reliable across platforms for what we want
+
+console.log('HOST_URL',HOST_URL)
+
   return HOST_URL               // as first call inherently needs to be a login
 }
 
