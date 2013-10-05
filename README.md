@@ -29,6 +29,12 @@ Sample application for A2P3
 
 8) `npm start` will start the server locally
 
+## Accessing Local Server
+
+Most machines development machines do not have an internet accessible hostname. In order to login to a locally deployed app with a Personal Agent on a mobile device, your mobile device needs to be able to access the development machine. This can often be done by having your mobile device use wifi that is conneted to the same network that your development machine is on, and then you can use the local hostname of your development machine to access it from your mobile device. Enter the development machine host name and the port it is running on in the browser on your mobile device. If you have a personal agent installed on your mobile device, you should be able to login to your app.
+
+To login from a browser on a PC, make sure that you also use the same hostname and port, and the you will be prompted to scan a QR code with the personal agent on your mobile device.
+
 ## Deployment to AWS Elastic Beanstalk
 
 1) Add the generated vault.json and config.json files to the local repo so that they will be deployed to AWS:
