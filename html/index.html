@@ -29,10 +29,7 @@
 
 			<br><Br>
 			<table id="profileTable" class="profileTable"> </table>
-			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>
-			<!--
-				<a class="backdoorLinks" href="/login/backdoor" id="loginBackdoor" class="loginItem"> or the login backdoor </a>
-			-->
+			<a class="genericButton"href="/logout" id="logout" class="loginItem">&nbsp;&nbsp;Logout&nbsp;&nbsp;</a>s
 		</div>
 
 	</section>
@@ -80,8 +77,6 @@ function onReady() {
 
   $('#qrcodeForm').hide()
   $('#logout').hide()
-  $('#notificationPopup').hide()
-  $('#loginNotification').hide()
 
   function drawProfile( profile ) {
     // console.log( profile )
@@ -127,7 +122,6 @@ function onReady() {
 			  width : getQRCodeSize() + 35,
 			  height : getQRCodeSize() + 70
 			});
-          $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: getQRCodeSize(), height: getQRCodeSize(), text: data.result.qrURL, render: getQRCodeRenderType()} )
           $('#qrcode').css({cursor: 'none'});
           cycles = 0
