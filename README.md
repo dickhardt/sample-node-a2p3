@@ -31,9 +31,9 @@ Sample application for A2P3
 
 ## Accessing Local Server
 
-Most machines development machines do not have an internet accessible hostname. In order to login to a locally deployed app with a Personal Agent on a mobile device, your mobile device needs to be able to access the development machine. This can often be done by having your mobile device use wifi that is conneted to the same network that your development machine is on, and then you can use the local hostname of your development machine to access it from your mobile device. Enter the development machine host name and the port it is running on in the browser on your mobile device. If you have a personal agent installed on your mobile device, you should be able to login to your app.
+When accessing your local server, you need to use a hostname that is resolvable on your local network. When accessing from your mobile device (the only way currently to login and test your app), your mobile device needs to be on your local network and be able to resolve the hosthame.
 
-To login from a browser on a PC, make sure that you also use the same hostname and port, and the you will be prompted to scan a QR code with the personal agent on your mobile device.
+When this might not be obvious, is logging into the app from a PC and scanning the QR code with your personal agent on your mobile device. If the browser on the PC is not using a hostname resolvable to the server from the mobile device, the personal agent will not be able to complete the login process.
 
 ## Deployment to AWS Elastic Beanstalk
 
