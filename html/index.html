@@ -125,7 +125,7 @@ function onReady() {
           $('#qrcode').empty()
           $('#qrcodeForm').dialog({
 			  width : getQRCodeSize() + 35,
-			  height : getQRCodeSize() + 113
+			  height : getQRCodeSize() + 70
 			});
           $('#rememberMe').attr('checked', false)
           $('#qrcode').qrcode( {width: getQRCodeSize(), height: getQRCodeSize(), text: data.result.qrURL, render: getQRCodeRenderType()} )

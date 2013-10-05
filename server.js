@@ -19,14 +19,9 @@ var express = require('express')
   , vault = require('./vault.json')
 
 
-var LISTEN_PORT = 8080  // change if you want listen on a different port
+var LISTEN_PORT = 8181  // change if you want listen on a different port
 var HOST_URL = null
 
-if (process.env.DOTCLOUD_WWW_HTTP_URL) {
-  // looks like we are running on DotCloud, adjust our world
-  var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
-  LISTEN_PORT = 8080
-} else
 
 if (process.env.PORT) {
   LISTEN_PORT = process.env.PORT // most host environments set the PORT environment var to be where we listen
@@ -34,15 +29,8 @@ if (process.env.PORT) {
 
 // returnURL and callbackURL are constructed from the host that we are loaded from
 function makeHostUrl (req) {
-
-// console.log('\nreq\n', require('util').inspect( req, false, 1) )
-// console.log('\nreq.headers\n', req.headers )
-
   if (HOST_URL) return HOST_URL
   HOST_URL = req.headers.origin // HACK, but reliable across platforms for what we want
-
-console.log('HOST_URL',HOST_URL)
-
   return HOST_URL               // as first call inherently needs to be a login
 }
 
@@ -106,17 +94,6 @@ function storeTokenRequest ( qrSession, agentRequest, ixToken, notificationURL, 
   sessions[ qrSession ].agentRequest = agentRequest
   sessions[ qrSession ].notificationURL = notificationURL
   callback( null )
-}
-
-function storeRememberMe ( qrSession, remember, callback ) {
-  sessions[ qrSession ] = sessions[ qrSession ] || {}
-  sessions[ qrSession ].remember = remember
-  callback( null )
-}
-
-function checkRememberMe ( qrSession, callback ) {
-  var remember = sessions[ qrSession ] && sessions[ qrSession ].remember
-  callback( null, remember )
 }
 
 // metaRedirectInfoPage() returns a meta-refresh page with the supplied URL
@@ -197,27 +174,20 @@ function qrCode ( req, res ) {
   if ( !qrSession || qrSession.length != QR_SESSION_LENGTH || qrSession.match(/[^\w-]/g) ) {
     return res.redirect('/error')
   }
-  checkRememberMe( qrSession, function ( e, remember ) {
-    // ignore error since we can't do anything about it
-
-    var params =
-      { callbackURL: makeHostUrl( req ) + '/response/callback'
-      , resources: RESOURCES
-      }
-    var agentRequest = a2p3.createAgentRequest( config, vault, params )
-    var json = req.query.json
-    if ( json ) {
-      var response = { result: { agentRequest: agentRequest, state: qrSession } }
-      if (remember) response.result.notificationURL = true
-      return res.send( response )
-    } else {
-      var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
-      // below never happens as remember me can only be set if scanning a QR code
-      // if (remember) redirectURL += '&notificationURL=true'
-      var html =  metaRedirectInfoPage( redirectURL )
-      return res.send( html )
+  var params =
+    { callbackURL: makeHostUrl( req ) + '/response/callback'
+    , resources: RESOURCES
     }
-  })
+  var agentRequest = a2p3.createAgentRequest( config, vault, params )
+  var json = req.query.json
+  if ( json ) {
+    var response = { result: { agentRequest: agentRequest, state: qrSession } }
+    return res.send( response )
+  } else {
+    var redirectURL = 'a2p3://token?request=' + agentRequest + '&state=' + qrSession
+    var html =  metaRedirectInfoPage( redirectURL )
+    return res.send( html )
+  }
 
 }
 
