@@ -25,7 +25,7 @@ var HOST_URL = null
 if (process.env.DOTCLOUD_WWW_HTTP_URL) {
   // looks like we are running on DotCloud, adjust our world
   var HOST_URL = 'https://' + process.env.DOTCLOUD_WWW_HTTP_HOST
-  LISTEN_PORT = 8181
+  LISTEN_PORT = 8080
 } else
 
 if (process.env.PORT) {
