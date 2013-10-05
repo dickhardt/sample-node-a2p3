@@ -69,11 +69,17 @@ function getQRCodeRenderType () {
 
 function onReady() {
 
-  // check if are running on iOS or android, only agent platforms currently supported
+  // check if are running on a mobile platform to determine if we put up QR code or redirect to a2p3: scheme
   var deviceAgent = navigator.userAgent.toLowerCase()
   var iOS = deviceAgent.match(/(iphone|ipod|ipad)/)
+  var isWindowsPhone8 = deviceAgent.indexOf("windows phone 8") > -1
+
+  // the followiner are placeholders, there may be additional refinement as to which platforms the available agents can properly run on
+  var isBlackberry10 = deviceAgent.indexOf("bb10") > -1
   var isAndroid = deviceAgent.indexOf("android") > -1
-  var agentDirect = iOS // || isAndroid // only support iOS currently
+
+  // flag to indicate we will invoke the agent directly via a2p3: and put a link to the agent in the meta_refresh page
+  var agentDirect = iOS || isWindowsPhone8 // agents are only available for iOS and Windows Phone 8
 
   $('#qrcodeForm').hide()
   $('#logout').hide()
