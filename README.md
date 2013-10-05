@@ -33,7 +33,7 @@ Sample application for A2P3
 
 When accessing your local server, you need to use a hostname that is resolvable on your local network. When accessing from your mobile device (the only way currently to login and test your app), your mobile device needs to be on your local network and be able to resolve the hosthame.
 
-When this might not be obvious, is logging into the app from a PC and scanning the QR code with your personal agent on your mobile device. If the browser on the PC is not using a hostname resolvable to the server from the mobile device, the personal agent will not be able to complete the login process.
+This might not be obvious when logging into the app from a PC and scanning the QR code with your personal agent on your mobile device. If the browser on the PC is not using a hostname resolvable to the server from the mobile device, the personal agent will not be able to complete the login process.
 
 ## Deployment to AWS Elastic Beanstalk
 
