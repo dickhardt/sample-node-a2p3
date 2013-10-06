@@ -49,7 +49,7 @@ This might not be obvious when logging into the app from a PC and scanning the Q
 
 4) Install and setup the [eb](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/usingCLI.html) CLI tools.
 
-5) `eb init` providing yoru Access Key ID and Secret Access Key and accept all defaults
+5) `eb init` providing your Access Key ID and Secret Access Key and accept all defaults and selecting a Node.js image.
 
 6) `eb start` will deply and start your application
 
