@@ -41,6 +41,7 @@ This might not be obvious when logging into the app from a PC and scanning the Q
 
   git add -f vault.json
   git add -f config.json
+  git commit -a -m"add in vault and config"
 
 2) Browse to [AWS](http://aws.amazon.com) and register or login.
 
@@ -52,7 +53,7 @@ This might not be obvious when logging into the app from a PC and scanning the Q
 
 6) `eb start` will deply and start your application
 
-When you make changes, `git aws.push` will upload your local commits
+When you make changes, `git aws.push` will upload your local commits to AWS (remember to `git commit -a -m"<commit description here>"`)
 
 Additional documetion on running [Node on Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_nodejs.html)
 
