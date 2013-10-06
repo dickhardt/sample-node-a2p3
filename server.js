@@ -113,7 +113,7 @@ function metaRedirectInfoPage ( redirectURL, userAgent ) {
   var html = fs.readFileSync( META_REFRESH_HTML_FILE, 'utf8' )
   html = html.replace( '$REDIRECT_URL', redirectURL )
   var mobilePlatform = 'iOS'  // default
-  if (userAgent.indexOf("windows phone 8") > -1)
+  if (userAgent.indexOf("Windows Phone 8") > -1)
     mobilePlatform = 'windowsPhone'
   html = html.replace( '$STORE_URL', STORES[mobilePlatform].url)
   html = html.replace( '$STORE_IMAGE', STORES[mobilePlatform].image)
