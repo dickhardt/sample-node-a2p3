@@ -174,7 +174,7 @@ body img[height="1"] {
 }
 
 .headerContainer .mainLogo {
-	
+
 }
 
 
@@ -307,7 +307,9 @@ body img[height="1"] {
 
 .mainTitleText {
 	font-family: 'Century Gothic';
-	font-size: 15px;
+	font-size: 14px;
+	display: block;
+	white-space: nowrap;
 }
 
 .genericButton
@@ -376,9 +378,9 @@ body img[height="1"] {
 	border-radius: 4px;
 }
 .ie7 .submit,.ie8 .submit {
-	filter: progid:DXImageTransform.Microsoft.gradient(              
-		                     
-		                     
+	filter: progid:DXImageTransform.Microsoft.gradient(
+
+
 		                     startColorstr='#e9573f', endColorstr='#be3322',
 		GradientType=0 );
 }
