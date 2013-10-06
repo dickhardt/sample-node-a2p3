@@ -177,6 +177,10 @@ body img[height="1"] {
 
 }
 
+.headerLogo {
+	float:left;
+	padding-right: 8px;
+}
 
 .mainTitle {
 	font-family: 'Sansus_Webissimo-Regular';
