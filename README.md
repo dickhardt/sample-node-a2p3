@@ -55,7 +55,7 @@ This might not be obvious when logging into the app from a PC and scanning the Q
 
 When you make changes, `git aws.push` will upload your local commits to AWS (remember to `git commit -a -m"<commit description here>"`)
 
-Additional documetion on running [Node on Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_nodejs.html)
+Additional documentation on running [Node on Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_nodejs.html)
 
 ##Related
 
